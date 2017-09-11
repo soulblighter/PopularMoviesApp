@@ -5,8 +5,18 @@
     android:layout_height="match_parent">
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/gridview"
+        android:id="@+id/rv_gridview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+    <TextView
+        android:id="@+id/tv_error_box"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="error msg"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="@android:color/holo_red_dark"
+        android:visibility="gone"
+        android:padding="16dp"/>
 
 </FrameLayout>

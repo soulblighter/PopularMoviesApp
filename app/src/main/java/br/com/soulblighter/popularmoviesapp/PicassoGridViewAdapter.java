@@ -13,22 +13,18 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.Map;
+import java.util.List;
 
 public class PicassoGridViewAdapter extends RecyclerView.Adapter<PicassoGridViewAdapter.ViewHolder> {
 
-    private Map<Integer,String> mData = null;
+    private List<TmdbMovie> mData = null;
     private LayoutInflater mInflater;
-    private ItemClickListener mClickListener;
+    private PicassoClickListener mClickListener;
     Context mContext;
     Point displaySize;
+    int imageSize;
 
-    interface onClickHandler {
-        void PicassoAdapterOnClick(int id);
-    }
-
-    // data is passed into the constructor
-    public PicassoGridViewAdapter(Context context, Map<Integer,String> data) {
+    public PicassoGridViewAdapter(Context context, List<TmdbMovie> data) {
         mContext = context;
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
@@ -37,9 +33,9 @@ public class PicassoGridViewAdapter extends RecyclerView.Adapter<PicassoGridView
         Display display = wm.getDefaultDisplay();
         displaySize = new Point();
         display.getSize(displaySize);
+        imageSize = displaySize.x > displaySize.y ? displaySize.x : displaySize.y;
     }
 
-    // inflates the cell layout from xml when needed
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.grid_item, parent, false);
@@ -47,34 +43,27 @@ public class PicassoGridViewAdapter extends RecyclerView.Adapter<PicassoGridView
         return viewHolder;
     }
 
-    // binds the data to the textview in each cell
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        String url = null;
-        url = NetworkUtils.IMAGE_TMDB_URL + mData.get(position);
+        String posterPath = mData.get(position).posterPath;
+        String url = NetworkUtils.IMAGE_TMDB_URL + posterPath;
 
-        // Used resize with screen site to make
         if(url != null) {
             Picasso.with(mContext)
                     .load(url)
                     .tag(position)
-                    .resize(displaySize.x, displaySize.y)
-                    .centerInside()
+                    .placeholder(R.color.colorPrimary)
                     .into(holder.imageView);
-//                .placeholder(android.support.v7.appcompat.R.drawable.)
-//                .error(R.drawable.error)
         } else {
-            Log.e(Utils.TAG, "onBindViewHolder: url is null");
+            Log.e(this.getClass().getSimpleName(), "onBindViewHolder: url is null");
         }
     }
 
-    // total number of cells
     @Override
     public int getItemCount() {
         return mData == null ? 0 : mData.size();
     }
 
-    // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public ImageView imageView;
 
@@ -86,26 +75,23 @@ public class PicassoGridViewAdapter extends RecyclerView.Adapter<PicassoGridView
 
         @Override
         public void onClick(View view) {
-            if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
+            if (mClickListener != null) mClickListener.onPicassoItemClick(view, getAdapterPosition());
         }
     }
 
-    // convenience method for getting data at click position
-    public String getItem(int id) {
-        return mData == null ? "" : mData.get(id);
+    public TmdbMovie getItem(int id) {
+        return mData == null ? null : mData.get(id);
     }
 
-    // allows clicks events to be caught
-    public void setClickListener(ItemClickListener itemClickListener) {
+    public void setClickListener(PicassoClickListener itemClickListener) {
         this.mClickListener = itemClickListener;
     }
 
-    // parent activity will implement this method to respond to click events
-    public interface ItemClickListener {
-        void onItemClick(View view, int position);
+    public interface PicassoClickListener {
+        void onPicassoItemClick(View view, int position);
     }
 
-    public void setData(Map<Integer,String> data) {
+    public void setData(List<TmdbMovie> data) {
         mData = data;
         notifyDataSetChanged();
     }
