@@ -1,16 +1,16 @@
 package br.com.soulblighter.popularmoviesapp;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-// I have no shame to say that this class was generated from here: http://www.jsonschema2pojo.org/
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+// This class was auto generated from here: http://www.jsonschema2pojo.org/
 public class TmdbMovie implements Serializable, Parcelable {
 
     @SerializedName("vote_count")

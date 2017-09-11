@@ -1,7 +1,6 @@
 package br.com.soulblighter.popularmoviesapp;
 
 import android.content.Context;
-import android.graphics.Point;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Display;
@@ -21,8 +20,6 @@ public class PicassoGridViewAdapter extends RecyclerView.Adapter<PicassoGridView
     private LayoutInflater mInflater;
     private PicassoClickListener mClickListener;
     Context mContext;
-    Point displaySize;
-    int imageSize;
 
     public PicassoGridViewAdapter(Context context, List<TmdbMovie> data) {
         mContext = context;
@@ -31,9 +28,6 @@ public class PicassoGridViewAdapter extends RecyclerView.Adapter<PicassoGridView
 
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
-        displaySize = new Point();
-        display.getSize(displaySize);
-        imageSize = displaySize.x > displaySize.y ? displaySize.x : displaySize.y;
     }
 
     @Override
