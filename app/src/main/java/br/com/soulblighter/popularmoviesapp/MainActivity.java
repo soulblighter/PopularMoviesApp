@@ -1,7 +1,6 @@
 package br.com.soulblighter.popularmoviesapp;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
@@ -13,13 +12,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import java.net.URL;
 import java.util.List;
 
 import static br.com.soulblighter.popularmoviesapp.MainActivity.ErrorType.NO_CONNECTION;
 import static br.com.soulblighter.popularmoviesapp.MainActivity.ErrorType.PARSE_JSON;
 
-public class MainActivity extends AppCompatActivity implements PicassoGridViewAdapter.PicassoClickListener{
+public class MainActivity extends AppCompatActivity implements PicassoGridViewAdapter.PicassoClickListener, NetworkRequestTask.NetworkRequestTaskListener{
 
     public enum SortMethod {
         SORT_POPULAR,
@@ -43,11 +41,9 @@ public class MainActivity extends AppCompatActivity implements PicassoGridViewAd
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         if(savedInstanceState != null && savedInstanceState.containsKey(EXTRA_SORT_METHOD)) {
             sortMethodSelected = SortMethod.values()[savedInstanceState.getInt(EXTRA_SORT_METHOD)];
         }
-
 
         adapter = new PicassoGridViewAdapter(this, null);
         adapter.setClickListener(this);
@@ -83,9 +79,9 @@ public class MainActivity extends AppCompatActivity implements PicassoGridViewAd
 
         try {
             if( method == SortMethod.SORT_POPULAR) {
-                new NetworkRequestTask().execute(NetworkUtils.buildPopularUrl());
+                new NetworkRequestTask(this).execute(NetworkUtils.buildPopularUrl());
             } else if( method == SortMethod.SORT_RATING) {
-                new NetworkRequestTask().execute(NetworkUtils.buildTopRatedUrl());
+                new NetworkRequestTask(this).execute(NetworkUtils.buildTopRatedUrl());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -117,44 +113,6 @@ public class MainActivity extends AppCompatActivity implements PicassoGridViewAd
         return super.onOptionsItemSelected(item);
     }
 
-    private class NetworkRequestTask extends AsyncTask< URL, Void, List<TmdbMovie> > {
-
-        @Override
-        protected List<TmdbMovie> doInBackground(URL... params) {
-            if (params.length == 0) {
-                return null;
-            }
-
-            try {
-                URL url = params[0];
-
-                String jsonResponse = NetworkUtils
-                        .getResponseFromHttpUrl(url);
-
-                List<TmdbMovie> parsedData = TMDBJsonUtils
-                        .getImagesFromJson(MainActivity.this, jsonResponse);
-
-                return parsedData;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(List<TmdbMovie> parsedData) {
-            if (parsedData != null) {
-                showDataGrid();
-                adapter.setData(parsedData);
-                adapter.notifyDataSetChanged();
-            } else {
-                showError(PARSE_JSON);
-                //Toast.makeText(MainActivity.this, R.string.error_parse_json, Toast.LENGTH_SHORT).show();
-                Log.e(this.getClass().getSimpleName(), "onPostExecute: parsedData is null");
-            }
-        }
-    }
-
     void showDataGrid() {
         rv_gridview.setVisibility(View.VISIBLE);
         tv_error_box.setVisibility(View.GONE);
@@ -174,5 +132,17 @@ public class MainActivity extends AppCompatActivity implements PicassoGridViewAd
         }
     }
 
+    @Override
+    public void onNetworkTaskComplete(List<TmdbMovie> parsedData) {
+        if (parsedData != null) {
+            showDataGrid();
+            adapter.setData(parsedData);
+            adapter.notifyDataSetChanged();
+        } else {
+            showError(PARSE_JSON);
+            //Toast.makeText(MainActivity.this, R.string.error_parse_json, Toast.LENGTH_SHORT).show();
+            Log.e(this.getClass().getSimpleName(), "onPostExecute: parsedData is null");
+        }
+    }
 
 }

@@ -20,7 +20,7 @@ public final class NetworkUtils {
     public static final String IMAGE_TMDB_URL = "http://image.tmdb.org/t/p/w185/";
 
     final static String API_KEY_PARAM = "api_key";
-    final static String API_KEY_VALUE = "";
+    final static String API_KEY_VALUE = BuildConfig.API_KEY;
 
     public static URL buildPopularUrl() throws MalformedURLException {
         Uri.Builder builder = Uri.parse(POPULAR_URL).buildUpon();
