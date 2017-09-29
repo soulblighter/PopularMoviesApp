@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -13,10 +14,10 @@
         android:id="@+id/tv_error_box"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="error msg"
+        android:padding="16dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textColor="@android:color/holo_red_dark"
         android:visibility="gone"
-        android:padding="16dp"/>
+        tools:text="error msg" />
 
 </FrameLayout>

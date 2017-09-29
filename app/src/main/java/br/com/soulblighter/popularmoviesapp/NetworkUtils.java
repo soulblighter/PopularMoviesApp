@@ -11,16 +11,16 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
-public final class NetworkUtils {
+final class NetworkUtils {
 
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
-    public static final String POPULAR_URL = "http://api.themoviedb.org/3/movie/popular";
-    public static final String TOP_RATED_URL = "http://api.themoviedb.org/3/movie/top_rated";
+    private static final String POPULAR_URL = "http://api.themoviedb.org/3/movie/popular";
+    private static final String TOP_RATED_URL = "http://api.themoviedb.org/3/movie/top_rated";
     public static final String IMAGE_TMDB_URL = "http://image.tmdb.org/t/p/w185/";
 
-    final static String API_KEY_PARAM = "api_key";
-    final static String API_KEY_VALUE = BuildConfig.API_KEY;
+    private final static String API_KEY_PARAM = "api_key";
+    private final static String API_KEY_VALUE = BuildConfig.API_KEY;
 
     public static URL buildPopularUrl() throws MalformedURLException {
         Uri.Builder builder = Uri.parse(POPULAR_URL).buildUpon();

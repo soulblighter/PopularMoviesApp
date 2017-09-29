@@ -29,10 +29,8 @@ class NetworkRequestTask extends AsyncTask<URL, Void, List<TmdbMovie>> {
             String jsonResponse = NetworkUtils
                     .getResponseFromHttpUrl(url);
 
-            List<TmdbMovie> parsedData = TMDBJsonUtils
+            return TMDBJsonUtils
                     .getImagesFromJson(jsonResponse);
-
-            return parsedData;
         } catch (Exception e) {
             e.printStackTrace();
             return null;

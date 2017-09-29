@@ -1,12 +1,10 @@
 package br.com.soulblighter.popularmoviesapp;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -19,11 +17,11 @@ public class DetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_MOVIE = "movie";
 
-    ImageView iv_poster;
-    TextView tv_date;
-    TextView tv_rating;
-    TextView tv_summary;
-    TextView tv_name;
+    private ImageView iv_poster;
+    private TextView tv_date;
+    private TextView tv_rating;
+    private TextView tv_summary;
+    private TextView tv_name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +52,9 @@ public class DetailActivity extends AppCompatActivity {
 
         String url = NetworkUtils.IMAGE_TMDB_URL + movie.posterPath;
 
-        if(url != null) {
-            Picasso.with(this)
-                    .load(url)
-                    .placeholder(R.color.colorPrimary)
-                    .into(iv_poster);
-        }
+        Picasso.with(this)
+                .load(url)
+                .placeholder(R.color.colorPrimary)
+                .into(iv_poster);
     }
 }

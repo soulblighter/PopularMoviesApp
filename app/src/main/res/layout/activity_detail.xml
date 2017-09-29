@@ -19,6 +19,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
+            android:contentDescription="@string/poster_descritor"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_name"
             app:srcCompat="@android:color/background_light" />
@@ -30,9 +31,9 @@
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text="date"
             app:layout_constraintLeft_toRightOf="@+id/iv_poster"
-            app:layout_constraintTop_toBottomOf="@+id/tv_name" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_name"
+            tools:text="date" />
 
         <TextView
             android:id="@+id/tv_rating"
@@ -41,9 +42,9 @@
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text="rating"
             app:layout_constraintLeft_toRightOf="@+id/iv_poster"
-            app:layout_constraintTop_toBottomOf="@+id/tv_date" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_date"
+            tools:text="rating" />
 
         <TextView
             android:id="@+id/tv_summary"
@@ -53,10 +54,10 @@
             android:layout_marginRight="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="11dp"
-            android:text="summary"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/iv_poster" />
+            app:layout_constraintTop_toBottomOf="@+id/iv_poster"
+            tools:text="summary" />
 
         <View
             android:layout_width="350dp"
@@ -77,14 +78,14 @@
             android:layout_height="102dp"
             android:background="@color/colorPrimary"
             android:gravity="center"
-            android:text="movie name"
             android:textAlignment="center"
             android:textAllCaps="false"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             android:textColor="@android:color/background_light"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="movie name" />
 
     </android.support.constraint.ConstraintLayout>
 </ScrollView>

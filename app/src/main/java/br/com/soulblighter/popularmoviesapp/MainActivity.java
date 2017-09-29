@@ -1,11 +1,12 @@
 package br.com.soulblighter.popularmoviesapp;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,15 +23,15 @@ public class MainActivity extends AppCompatActivity implements PicassoGridViewAd
     public enum SortMethod {
         SORT_POPULAR,
         SORT_RATING
-    };
+    }
 
     public enum ErrorType {
         NO_CONNECTION,
         PARSE_JSON
-    };
+    }
 
     private SortMethod sortMethodSelected = SortMethod.SORT_POPULAR;
-    public static final String EXTRA_SORT_METHOD = "sort_method";
+    private static final String EXTRA_SORT_METHOD = "sort_method";
 
     private RecyclerView rv_gridview;
     private TextView tv_error_box;
@@ -50,7 +51,15 @@ public class MainActivity extends AppCompatActivity implements PicassoGridViewAd
 
         rv_gridview = (RecyclerView) findViewById(R.id.rv_gridview);
         tv_error_box = (TextView) findViewById(R.id.tv_error_box);
-        rv_gridview.setLayoutManager(new GridLayoutManager(this, 2));
+
+        int display_mode = getResources().getConfiguration().orientation;
+
+        if (display_mode == Configuration.ORIENTATION_PORTRAIT) {
+            rv_gridview.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+        } else {
+            rv_gridview.setLayoutManager(new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL));
+        }
+
         rv_gridview.setAdapter(adapter);
 
         loadData(sortMethodSelected);
@@ -69,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements PicassoGridViewAd
         startActivity(intent);
     }
 
-    void loadData(SortMethod method) {
+    private void loadData(SortMethod method) {
 
         if(!NetworkUtils.isOnline(this)) {
             //Toast.makeText(this, getString(R.string.error_no_network), Toast.LENGTH_SHORT).show();
@@ -113,12 +122,12 @@ public class MainActivity extends AppCompatActivity implements PicassoGridViewAd
         return super.onOptionsItemSelected(item);
     }
 
-    void showDataGrid() {
+    private void showDataGrid() {
         rv_gridview.setVisibility(View.VISIBLE);
         tv_error_box.setVisibility(View.GONE);
     }
 
-    void showError(ErrorType error) {
+    private void showError(ErrorType error) {
         rv_gridview.setVisibility(View.GONE);
         tv_error_box.setVisibility(View.VISIBLE);
         switch (error) {
