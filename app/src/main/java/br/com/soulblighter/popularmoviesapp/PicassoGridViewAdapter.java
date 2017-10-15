@@ -9,7 +9,11 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
+import java.net.MalformedURLException;
 import java.util.List;
+
+import br.com.soulblighter.popularmoviesapp.json.TmdbMovie;
+import br.com.soulblighter.popularmoviesapp.network.NetworkUtils;
 
 public class PicassoGridViewAdapter extends RecyclerView.Adapter<PicassoGridViewAdapter.ViewHolder> {
 
@@ -33,12 +37,16 @@ public class PicassoGridViewAdapter extends RecyclerView.Adapter<PicassoGridView
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         String posterPath = mData.get(position).posterPath;
-        String url = NetworkUtils.IMAGE_TMDB_URL + posterPath;
-
-        Picasso.with(mContext)
-                .load(url)
-                .placeholder(R.color.colorPrimary)
-                .into(holder.imageView);
+        String url = null;
+        try {
+            url = NetworkUtils.buildImageUrl(posterPath).toString();
+            Picasso.with(mContext)
+                    .load(url)
+                    .placeholder(R.color.colorPrimary)
+                    .into(holder.imageView);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -1,4 +1,4 @@
-package br.com.soulblighter.popularmoviesapp;
+package br.com.soulblighter.popularmoviesapp.json;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -13,45 +13,59 @@ import java.util.List;
 // This class was auto generated from here: http://www.jsonschema2pojo.org/
 public class TmdbMovie implements Serializable, Parcelable {
 
+
     @SerializedName("vote_count")
     @Expose
     public int voteCount;
+
     @SerializedName("id")
     @Expose
     public int id;
+
     @SerializedName("video")
     @Expose
     public boolean video;
+
     @SerializedName("vote_average")
     @Expose
     public double voteAverage;
+
     @SerializedName("title")
     @Expose
     public String title;
+
     @SerializedName("popularity")
     @Expose
     public double popularity;
+
     @SerializedName("poster_path")
     @Expose
     public String posterPath;
+
     @SerializedName("original_language")
     @Expose
     public String originalLanguage;
+
     @SerializedName("original_title")
     @Expose
     public String originalTitle;
+
     @SerializedName("genre_ids")
     @Expose
-    public List<Integer> genreIds = null;
+    public List<Integer> genreIds = new ArrayList<>();
+
     @SerializedName("backdrop_path")
     @Expose
     public String backdropPath;
+
     @SerializedName("adult")
     @Expose
     public boolean adult;
+
     @SerializedName("overview")
     @Expose
     public String overview;
+
     @SerializedName("release_date")
     @Expose
     public String releaseDate;
@@ -73,7 +87,6 @@ public class TmdbMovie implements Serializable, Parcelable {
             instance.posterPath = ((String) in.readValue((String.class.getClassLoader())));
             instance.originalLanguage = ((String) in.readValue((String.class.getClassLoader())));
             instance.originalTitle = ((String) in.readValue((String.class.getClassLoader())));
-            instance.genreIds = new ArrayList<>();
             in.readList(instance.genreIds, (java.lang.Integer.class.getClassLoader()));
             instance.backdropPath = ((String) in.readValue((String.class.getClassLoader())));
             instance.adult = ((boolean) in.readValue((boolean.class.getClassLoader())));
@@ -95,22 +108,6 @@ public class TmdbMovie implements Serializable, Parcelable {
     public TmdbMovie() {
     }
 
-    /**
-     * @param genreIds
-     * @param id
-     * @param title
-     * @param releaseDate
-     * @param overview
-     * @param posterPath
-     * @param originalTitle
-     * @param voteAverage
-     * @param originalLanguage
-     * @param adult
-     * @param backdropPath
-     * @param voteCount
-     * @param video
-     * @param popularity
-     */
     public TmdbMovie(int voteCount, int id, boolean video, double voteAverage, String title, double popularity, String posterPath, String originalLanguage, String originalTitle, List<Integer> genreIds, String backdropPath, boolean adult, String overview, String releaseDate) {
         super();
         this.voteCount = voteCount;

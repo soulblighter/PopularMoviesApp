@@ -1,11 +1,10 @@
-package br.com.soulblighter.popularmoviesapp;
+package br.com.soulblighter.popularmoviesapp.network;
 
 import android.os.AsyncTask;
 
 import java.net.URL;
-import java.util.List;
 
-class NetworkRequestTask extends AsyncTask<URL, Void, List<TmdbMovie>> {
+public class NetworkRequestTask extends AsyncTask<URL, Void, String> {
 
     private NetworkRequestTaskListener mNetworkTaskListener;
 
@@ -14,11 +13,11 @@ class NetworkRequestTask extends AsyncTask<URL, Void, List<TmdbMovie>> {
     }
 
     public interface NetworkRequestTaskListener {
-        void onNetworkTaskComplete(List<TmdbMovie> parsedData);
+        void onNetworkTaskComplete(String data);
     }
 
     @Override
-    protected List<TmdbMovie> doInBackground(URL... params) {
+    protected String doInBackground(URL... params) {
         if (params.length == 0) {
             return null;
         }
@@ -29,8 +28,7 @@ class NetworkRequestTask extends AsyncTask<URL, Void, List<TmdbMovie>> {
             String jsonResponse = NetworkUtils
                     .getResponseFromHttpUrl(url);
 
-            return TMDBJsonUtils
-                    .getImagesFromJson(jsonResponse);
+            return jsonResponse;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -38,9 +36,9 @@ class NetworkRequestTask extends AsyncTask<URL, Void, List<TmdbMovie>> {
     }
 
     @Override
-    protected void onPostExecute(List<TmdbMovie> parsedData) {
+    protected void onPostExecute(String data) {
         if(mNetworkTaskListener != null) {
-            mNetworkTaskListener.onNetworkTaskComplete(parsedData);
+            mNetworkTaskListener.onNetworkTaskComplete(data);
         }
     }
 }

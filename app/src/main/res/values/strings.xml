@@ -1,10 +1,13 @@
 <resources>
     <string name="app_name">Popular Movies App</string>
-    <string name="sort_popular">Sort by most popular</string>
-    <string name="sort_rate">Sort by top rated</string>
+    <string name="menu_sort_popular">Sort by most popular</string>
+    <string name="menu_sort_rate">Sort by top rated</string>
+    <string name="menu_show_favorites">Show favorites</string>
     <string name="release_date">Release date:</string>
     <string name="rating">Average vote:</string>
     <string name="error_no_network">Cannot connect to TMDB without network connection!</string>
     <string name="error_parse_json">Error parsing data from TMDB (hint: check API key)</string>
     <string name="poster_descritor">Movie poster</string>
+    <string name="trailers_label">Trailers:</string>
+    <string name="reviews_label">Reviews:</string>
 </resources>
