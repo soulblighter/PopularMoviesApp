@@ -54,8 +54,7 @@ public class TmdbApiAsyncTaskLoader extends AsyncTaskLoader<String> {
         /* Parse the URL from the passed in String and perform the search */
         try {
             URL taskUrl = new URL(mUrl);
-            String jsonResult = NetworkUtils.getResponseFromHttpUrl(taskUrl);
-            return jsonResult;
+            return NetworkUtils.getResponseFromHttpUrl(taskUrl);
         } catch (IOException e) {
             e.printStackTrace();
             return null;

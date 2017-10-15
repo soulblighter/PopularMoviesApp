@@ -22,13 +22,14 @@ public class TmdbMovieContract {
         public static final Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_ARTICLES).build();
 
-        public static final String TABLE_NAME = "movie";
+        public static final String TABLE_NAME          = "movie";
 
-        public static final String COLUMN_MOVIE_ID = "movie_id";
-        public static final String COLUMN_TITLE = "title";
-        public static final String COLUMN_POSTER_PATH = "poster_path";
-        public static final String column_VOTE_AVERAGE = "vote_average";
-        public static final String column_RELEASE_DATE = "release_Date";
+        public static final String COLUMN_MOVIE_ID     = "movie_id";
+        public static final String COLUMN_TITLE        = "title";
+        public static final String COLUMN_POSTER_PATH  = "poster_path";
+        public static final String COLUMN_VOTE_AVERAGE = "vote_average";
+        public static final String COLUMN_RELEASE_DATE = "release_Date";
+        public static final String COLUMN_OVERVIEW     = "overview";
 
         public static Uri buildUriWithTableId(long id) {
             return CONTENT_URI.buildUpon()
@@ -49,8 +50,9 @@ public class TmdbMovieContract {
         values.put(Entry.COLUMN_MOVIE_ID, movie.id);
         values.put(Entry.COLUMN_TITLE, movie.title);
         values.put(Entry.COLUMN_POSTER_PATH, movie.posterPath);
-        values.put(Entry.column_VOTE_AVERAGE, movie.voteAverage);
-        values.put(Entry.column_RELEASE_DATE, movie.releaseDate);
+        values.put(Entry.COLUMN_VOTE_AVERAGE, movie.voteAverage);
+        values.put(Entry.COLUMN_RELEASE_DATE, movie.releaseDate);
+        values.put(Entry.COLUMN_OVERVIEW, movie.overview);
 
         return context.getContentResolver().insert(Entry.CONTENT_URI, values);
     }

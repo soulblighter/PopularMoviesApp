@@ -7,15 +7,12 @@ import android.net.Uri;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
 import br.com.soulblighter.popularmoviesapp.BuildConfig;
 
 public class NetworkUtils {
-
-    private static final String TAG = NetworkUtils.class.getSimpleName();
 
     private static final String BASE_URL = "http://api.themoviedb.org/3/movie/";
     private static final String POPULAR_PATH = "popular";
@@ -24,51 +21,50 @@ public class NetworkUtils {
     private static final String TRAILERS_PATH = "videos";
     private static final String IMAGE_TMDB_URL = "http://image.tmdb.org/t/p/w185/";
 
-    private static final String YOUTUBE_URL = "https://www.youtube.com/watch";
+    private static final String YOUTUBE_URL = "vnd.youtube:";
 
     private final static String API_KEY_PARAM = "api_key";
     private final static String API_KEY_VALUE = BuildConfig.API_KEY;
 
-    public static URL buildPopularUrl() throws MalformedURLException {
+    public static String buildPopularUrl() {
         Uri.Builder builder = Uri.parse(BASE_URL).buildUpon();
         builder.appendPath(POPULAR_PATH);
         builder.appendQueryParameter(API_KEY_PARAM, API_KEY_VALUE);
-        return new URL(builder.build().toString());
+        return builder.build().toString();
     }
 
-    public static URL buildTopRatedUrl() throws MalformedURLException {
+    public static String buildTopRatedUrl() {
         Uri.Builder builder = Uri.parse(BASE_URL).buildUpon();
         builder.appendPath(TOP_RATED_PATH);
         builder.appendQueryParameter(API_KEY_PARAM, API_KEY_VALUE);
-        return new URL(builder.build().toString());
+        return builder.build().toString();
     }
 
-    public static URL buildImageUrl(String image) throws MalformedURLException {
+    public static String buildImageUrl(String image) {
         Uri.Builder builder = Uri.parse(IMAGE_TMDB_URL).buildUpon();
         builder.appendEncodedPath(image);
-        return new URL(builder.build().toString());
+        return builder.build().toString();
     }
 
-    public static URL buildTrailersUrl(long movieId) throws MalformedURLException {
+    public static String buildTrailersUrl(long movieId) {
         Uri.Builder builder = Uri.parse(BASE_URL).buildUpon();
         builder.appendPath(String.valueOf(movieId));
         builder.appendPath(TRAILERS_PATH);
         builder.appendQueryParameter(API_KEY_PARAM, API_KEY_VALUE);
-        return new URL(builder.build().toString());
+        return builder.build().toString();
     }
 
-    public static URL buildYoutubeUrl(String key) throws MalformedURLException {
-        Uri.Builder builder = Uri.parse(YOUTUBE_URL).buildUpon();
-        builder.appendQueryParameter("V", key);
-        return new URL(builder.build().toString());
+    public static String buildYoutubeUrl(String key) {
+        Uri.Builder builder = Uri.parse(YOUTUBE_URL+key).buildUpon();
+        return builder.build().toString();
     }
 
-    public static URL buildReviewsUrl(long movieId) throws MalformedURLException {
+    public static String buildReviewsUrl(long movieId) {
         Uri.Builder builder = Uri.parse(BASE_URL).buildUpon();
         builder.appendPath(String.valueOf(movieId));
         builder.appendPath(REVIEWS_PATH);
         builder.appendQueryParameter(API_KEY_PARAM, API_KEY_VALUE);
-        return new URL(builder.build().toString());
+        return builder.build().toString();
     }
 
     public static String getResponseFromHttpUrl(URL url) throws IOException {

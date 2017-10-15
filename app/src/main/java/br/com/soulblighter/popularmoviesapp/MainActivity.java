@@ -18,8 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,20 +49,20 @@ public class MainActivity extends AppCompatActivity implements
 
 
     public static final String[] MAIN_TMDB_PROJECTION = {
-            TmdbMovieContract.Entry. _ID,
             TmdbMovieContract.Entry.COLUMN_MOVIE_ID,
             TmdbMovieContract.Entry.COLUMN_TITLE,
             TmdbMovieContract.Entry.COLUMN_POSTER_PATH,
-            TmdbMovieContract.Entry.column_RELEASE_DATE,
-            TmdbMovieContract.Entry.column_VOTE_AVERAGE,
+            TmdbMovieContract.Entry.COLUMN_RELEASE_DATE,
+            TmdbMovieContract.Entry.COLUMN_VOTE_AVERAGE,
+            TmdbMovieContract.Entry.COLUMN_OVERVIEW,
     };
 
-    public static final int INDEX_TMDB_ID = 0;
-    public static final int INDEX_TMDB_MOVIE_ID = 1;
-    public static final int INDEX_TMDB_TITLE = 2;
-    public static final int INDEX_TMDB_POSTER_PATH = 3;
-    public static final int INDEX_TMDB_RELEASE_DATE = 4;
-    public static final int INDEX_TMDB_VOTE_AVERAGE = 5;
+    public static final int INDEX_TMDB_MOVIE_ID = 0;
+    public static final int INDEX_TMDB_TITLE = 1;
+    public static final int INDEX_TMDB_POSTER_PATH = 2;
+    public static final int INDEX_TMDB_RELEASE_DATE = 3;
+    public static final int INDEX_TMDB_VOTE_AVERAGE = 4;
+    public static final int INDEX_TMDB_OVERVIEW = 5;
 
 
 
@@ -181,41 +179,28 @@ public class MainActivity extends AppCompatActivity implements
             case ID_LOADER_MAIN:
                 SortMethod method = SortMethod.values()[bundle.getInt(EXTRA_SORT_METHOD)];
 
-                URL url = null;
+                String url = null;
                 switch (method) {
                     case SORT_POPULAR:
-                        try {
-                            url = NetworkUtils.buildPopularUrl();
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        }
+                        url = NetworkUtils.buildPopularUrl();
                         break;
                     case SORT_RATING:
-                        try {
-                            url = NetworkUtils.buildTopRatedUrl();
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        }
+                        url = NetworkUtils.buildTopRatedUrl();
                         break;
                 }
-
-                return new TmdbApiAsyncTaskLoader(this, url.toString());
+                return new TmdbApiAsyncTaskLoader(this, url);
 
             case ID_LOADER_FAVORITES:
-                Uri queryUri = null;
-                String sortOrder = null;
-                String selection = null;
-                String[] selectionArgs = null;
                 /* URI for all rows of weather data in our weather table */
-                queryUri = TmdbMovieContract.Entry.CONTENT_URI;
+                Uri queryUri = TmdbMovieContract.Entry.CONTENT_URI;
                 /* Sort order: Ascending by date */
-                sortOrder = TmdbMovieContract.Entry.COLUMN_MOVIE_ID + " DESC";
+                String sortOrder = TmdbMovieContract.Entry.COLUMN_MOVIE_ID + " DESC";
 
                 return new CursorLoader(this,
                         queryUri,
                         MAIN_TMDB_PROJECTION,
-                        selection,
-                        selectionArgs,
+                        null,
+                        null,
                         sortOrder);
 
             default:
@@ -258,6 +243,7 @@ public class MainActivity extends AppCompatActivity implements
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     movie.releaseDate = sdf.format(date);
                     movie.voteAverage = cursor.getDouble(INDEX_TMDB_VOTE_AVERAGE);
+                    movie.overview = cursor.getString(INDEX_TMDB_OVERVIEW);
                     movies.add(movie);
                 }
 

@@ -12,7 +12,7 @@ public class TmdbMovieDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "tmdbDb.db";
 
     // If you change the database schema, you must increment the database version
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
     private static TmdbMovieDbHelper sInstance;
 
@@ -47,8 +47,9 @@ public class TmdbMovieDbHelper extends SQLiteOpenHelper {
                 TmdbMovieContract.Entry.COLUMN_MOVIE_ID     + " LONG NOT NULL UNIQUE ON CONFLICT IGNORE, " +
                 TmdbMovieContract.Entry.COLUMN_TITLE        + " TEXT NOT NULL, " +
                 TmdbMovieContract.Entry.COLUMN_POSTER_PATH  + " TEXT NOT NULL, " +
-                TmdbMovieContract.Entry.column_VOTE_AVERAGE + " REAL NOT NULL, " +
-                TmdbMovieContract.Entry.column_RELEASE_DATE + " LONG NOT NULL );";
+                TmdbMovieContract.Entry.COLUMN_VOTE_AVERAGE + " REAL NOT NULL, " +
+                TmdbMovieContract.Entry.COLUMN_RELEASE_DATE + " LONG NOT NULL, " +
+                TmdbMovieContract.Entry.COLUMN_OVERVIEW     + " TEXT NOT NULL );";
 
         db.execSQL(CREATE_TABLE);
     }

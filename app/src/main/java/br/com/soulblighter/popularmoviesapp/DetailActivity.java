@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,7 +18,6 @@ import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 
-import java.net.MalformedURLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -72,28 +70,20 @@ public class DetailActivity extends AppCompatActivity implements
         binding.tvSummary.setText(String.valueOf(movie.overview));
         binding.tvName.setText(String.valueOf(movie.title));
 
-        String url;
-        try {
-            url = NetworkUtils.buildImageUrl(movie.posterPath).toString();
-            Picasso.with(this)
-                    .load(url)
-                    .placeholder(R.color.colorPrimary)
-                    .into(binding.ivPoster);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+        Picasso.with(this)
+                .load(NetworkUtils.buildImageUrl(movie.posterPath))
+                .placeholder(R.color.colorPrimary)
+                .into(binding.ivPoster);
 
 
         binding.cbStar.setChecked(TmdbMovieContract.isFavorite(this, movie));
         binding.cbStar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if( !binding.cbStar.isChecked() ) {
-                    boolean c = TmdbMovieContract.unmarkAsFavorite(DetailActivity.this, movie);
-                    Log.d("julio", "Delete: "+c);
+                if (!binding.cbStar.isChecked()) {
+                    TmdbMovieContract.unmarkAsFavorite(DetailActivity.this, movie);
                 } else {
-                    Uri uri = TmdbMovieContract.markAsFavorite(DetailActivity.this, movie);
-                    Log.d("julio", "Inseted: "+uri);
+                    TmdbMovieContract.markAsFavorite(DetailActivity.this, movie);
                 }
             }
         });
@@ -140,37 +130,22 @@ public class DetailActivity extends AppCompatActivity implements
     @Override
     public Loader<String> onCreateLoader(int loaderId, final Bundle args) {
 
-        String url;
         long movie_id = args.getLong(LOADER_PARAM_MOVIE_ID);
         switch (loaderId) {
             case TRAILERS_LOADER:
 
                 binding.pbTrailers.setVisibility(View.VISIBLE);
-                try {
-                    url = NetworkUtils.buildTrailersUrl(movie_id).toString();
-                    return new TmdbApiAsyncTaskLoader(this, url);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
+                return new TmdbApiAsyncTaskLoader(this, NetworkUtils.buildTrailersUrl(movie_id));
 
-
-            break;
             case REVIEWS_LOADER:
 
                 binding.pbReview.setVisibility(View.VISIBLE);
-                try {
-                    url = NetworkUtils.buildReviewsUrl(movie_id).toString();
-                    return new TmdbApiAsyncTaskLoader(this, url);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
+                return new TmdbApiAsyncTaskLoader(this, NetworkUtils.buildReviewsUrl(movie_id));
 
-                break;
 
             default:
                 throw new RuntimeException("Loader Not Implemented: " + loaderId);
         }
-        return null;
     }
 
     @Override
@@ -187,16 +162,18 @@ public class DetailActivity extends AppCompatActivity implements
              * methods for checking errors, but we wanted to keep this particular example simple.
              */
                 if (null == data) {
-                    showError(getString(R.string.error_parse_json));
+                    if (NetworkUtils.isOnline(this)) {
+                        showError(getString(R.string.error_parse_json));
+                    }
                     binding.layoutTrailerList.setVisibility(View.GONE);
                 } else {
                     try {
                         List<TmdbTrailer> trailers = TmdbJsonUtils.getTmdbTrailersFromJson(data);
-                        if(trailers.size() == 0) {
+                        if (trailers.size() == 0) {
                             binding.layoutTrailerList.setVisibility(View.GONE);
                         }
-                        for(final TmdbTrailer trailer : trailers ) {
-                            if("YouTube".equals(trailer.site)) {
+                        for (final TmdbTrailer trailer : trailers) {
+                            if ("YouTube".equals(trailer.site)) {
                                 View v = vi.inflate(R.layout.trailer_item, null);
                                 TextView tv_trailer = v.findViewById(R.id.tv_trailer);
                                 tv_trailer.setText(trailer.name);
@@ -204,7 +181,7 @@ public class DetailActivity extends AppCompatActivity implements
                                 v.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
-                                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:"+trailer.key));
+                                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(NetworkUtils.buildYoutubeUrl(trailer.key)));
                                         startActivity(intent);
                                     }
                                 });
@@ -213,8 +190,10 @@ public class DetailActivity extends AppCompatActivity implements
                             }
                         }
                     } catch (JSONException e) {
-                        e.printStackTrace();
-                        showError(getString(R.string.error_parse_json));
+                        if (NetworkUtils.isOnline(this)) {
+                            e.printStackTrace();
+                            showError(getString(R.string.error_parse_json));
+                        }
                         binding.layoutTrailerList.setVisibility(View.GONE);
                     }
                 }
@@ -224,15 +203,17 @@ public class DetailActivity extends AppCompatActivity implements
             case REVIEWS_LOADER:
                 binding.pbReview.setVisibility(View.GONE);
                 if (null == data) {
-                    showError(getString(R.string.error_parse_json));
+                    if (NetworkUtils.isOnline(this)) {
+                        showError(getString(R.string.error_parse_json));
+                    }
                     binding.layoutReviewList.setVisibility(View.GONE);
                 } else {
                     try {
                         List<TmdbReview> reviews = TmdbJsonUtils.getTmdbReviewsFromJson(data);
-                        if(reviews.size() == 0) {
+                        if (reviews.size() == 0) {
                             binding.layoutReviewList.setVisibility(View.GONE);
                         }
-                        for(TmdbReview review  : reviews ) {
+                        for (TmdbReview review : reviews) {
 
                             View v = vi.inflate(R.layout.review_item, null);
                             TextView tv_author = v.findViewById(R.id.tv_author);
@@ -252,8 +233,10 @@ public class DetailActivity extends AppCompatActivity implements
                             binding.layoutReviewList.addView(v);
                         }
                     } catch (JSONException e) {
-                        e.printStackTrace();
-                        showError(getString(R.string.error_parse_json));
+                        if (NetworkUtils.isOnline(this)) {
+                            e.printStackTrace();
+                            showError(getString(R.string.error_parse_json));
+                        }
                         binding.layoutReviewList.setVisibility(View.GONE);
                     }
                 }
