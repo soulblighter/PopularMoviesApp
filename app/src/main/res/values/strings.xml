@@ -10,4 +10,6 @@
     <string name="poster_descritor">Movie poster</string>
     <string name="trailers_label">Trailers:</string>
     <string name="reviews_label">Reviews:</string>
+    <string name="mark_as_favorite">\"%1$s\" added as favorite.</string>
+    <string name="unmark_as_favorite">\"%1$s\" removed as favorite.</string>
 </resources>

@@ -11,8 +11,7 @@ import java.net.URL;
 public class TmdbApiAsyncTaskLoader extends AsyncTaskLoader<String> {
 
 
-    /* This String will contain the raw JSON */
-    String mJson;
+    /* This String will contain the raw JSON */ String mJson;
     String mUrl;
 
     public TmdbApiAsyncTaskLoader(Context context, String url) {
@@ -23,18 +22,21 @@ public class TmdbApiAsyncTaskLoader extends AsyncTaskLoader<String> {
     @Override
     protected void onStartLoading() {
 
-        /* If no arguments were passed, we don't have a query to perform. Simply return. */
+        /* If no arguments were passed, we don't have a query to perform.
+        Simply return. */
         if (mUrl == null) {
             return;
         }
 
         /*
-         * When we initially begin loading in the background, we want to display the
+         * When we initially begin loading in the background, we want to
+         * display the
          * loading indicator to the user
          */
 
         /*
-         * If we already have cached results, just deliver them now. If we don't have any
+         * If we already have cached results, just deliver them now. If we
+         * don't have any
          * cached results, force a load.
          */
         if (mJson != null) {

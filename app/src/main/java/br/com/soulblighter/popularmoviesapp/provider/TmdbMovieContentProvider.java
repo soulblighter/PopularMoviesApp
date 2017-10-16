@@ -21,17 +21,24 @@ public class TmdbMovieContentProvider extends ContentProvider {
 
     public static UriMatcher buildUriMatcher() {
 
-        // Initialize a UriMatcher with no matches by passing in NO_MATCH to the constructor
+        // Initialize a UriMatcher with no matches by passing in NO_MATCH to
+        // the constructor
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
         /*
           All paths added to the UriMatcher have a corresponding int.
-          For each kind of uri you may want to access, add the corresponding match with addURI.
-          The two calls below add matches for the Article directory and a single item by ID.
+          For each kind of uri you may want to access, add the corresponding
+          match with addURI.
+          The two calls below add matches for the Article directory and a
+          single item by ID.
          */
-        uriMatcher.addURI(TmdbMovieContract.AUTHORITY, TmdbMovieContract.PATH_ARTICLES, URI_MATCH_ARTICLE);
-        uriMatcher.addURI(TmdbMovieContract.AUTHORITY, TmdbMovieContract.PATH_ARTICLES + "/"+TmdbMovieContract.Entry._ID+"/#", URI_MATCH_ARTICLE_WITH_ID);
-        uriMatcher.addURI(TmdbMovieContract.AUTHORITY, TmdbMovieContract.PATH_ARTICLES + "/#", URI_MATCH_ARTICLE_WITH_MOVIE_ID);
+        uriMatcher.addURI(TmdbMovieContract.AUTHORITY, TmdbMovieContract
+            .PATH_ARTICLES, URI_MATCH_ARTICLE);
+        uriMatcher.addURI(TmdbMovieContract.AUTHORITY, TmdbMovieContract
+            .PATH_ARTICLES + "/" + TmdbMovieContract.Entry._ID + "/#",
+            URI_MATCH_ARTICLE_WITH_ID);
+        uriMatcher.addURI(TmdbMovieContract.AUTHORITY, TmdbMovieContract
+            .PATH_ARTICLES + "/#", URI_MATCH_ARTICLE_WITH_MOVIE_ID);
 
         return uriMatcher;
     }
@@ -53,7 +60,8 @@ public class TmdbMovieContentProvider extends ContentProvider {
         // Get access to the Article database (to write new data to)
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
-        // Write URI matching code to identify the match for the Articles directory
+        // Write URI matching code to identify the match for the Articles
+        // directory
         int match = sUriMatcher.match(uri);
         Uri returnUri; // URI to be returned
 
@@ -61,23 +69,29 @@ public class TmdbMovieContentProvider extends ContentProvider {
             case URI_MATCH_ARTICLE:
                 // Insert new values into the database
                 // Inserting values into Articles table
-                long id = db.insert(TmdbMovieContract.Entry.TABLE_NAME, null, values);
-                if ( id > 0 ) {
-                    returnUri = ContentUris.withAppendedId(TmdbMovieContract.Entry.CONTENT_URI, id);
+                long id = db.insert(TmdbMovieContract.Entry.TABLE_NAME, null,
+                    values);
+                if (id > 0) {
+                    returnUri = ContentUris.withAppendedId(TmdbMovieContract
+                        .Entry.CONTENT_URI, id);
                 } else {
-                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                    throw new android.database.SQLException("Failed to insert" +
+                        " row into " + uri);
                 }
                 break;
-            // Set the value for the returnedUri and write the default case for unknown URI's
+            // Set the value for the returnedUri and write the default case
+            // for unknown URI's
             // Default case throws an UnsupportedOperationException
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
-        // Notify the resolver if the uri has been changed, and return the newly inserted URI
+        // Notify the resolver if the uri has been changed, and return the
+        // newly inserted URI
         getContext().getContentResolver().notifyChange(uri, null);
 
-        // Return constructed uri (this points to the newly inserted row of data)
+        // Return constructed uri (this points to the newly inserted row of
+        // data)
         return returnUri;
     }
 
@@ -92,7 +106,8 @@ public class TmdbMovieContentProvider extends ContentProvider {
                 int rowsInserted = 0;
                 try {
                     for (ContentValues value : values) {
-                        long _id = db.insert(TmdbMovieContract.Entry.TABLE_NAME, null, value);
+                        long _id = db.insert(TmdbMovieContract.Entry
+                            .TABLE_NAME, null, value);
                         if (_id != -1) {
                             rowsInserted++;
                         }
@@ -114,9 +129,11 @@ public class TmdbMovieContentProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
+    public int delete(@NonNull Uri uri, @Nullable String s, @Nullable
+        String[] strings) {
 
-        // Get access to the database and write URI matching code to recognize a single item
+        // Get access to the database and write URI matching code to
+        // recognize a single item
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         int match = sUriMatcher.match(uri);
@@ -126,14 +143,14 @@ public class TmdbMovieContentProvider extends ContentProvider {
         // Write the code to delete a single row of data
         // [Hint] Use selections to delete an item by its row ID
         switch (match) {
-            // Handle the single item case, recognized by the ID included in the URI path
+            // Handle the single item case, recognized by the ID included in
+            // the URI path
             case URI_MATCH_ARTICLE_WITH_ID:
                 // Get the task ID from the URI path
                 String id = uri.getLastPathSegment();
                 // Use selections/selectionArgs to filter for this ID
                 tasksDeleted = db.delete(TmdbMovieContract.Entry.TABLE_NAME,
-                        TmdbMovieContract.Entry._ID+"=?",
-                        new String[]{id});
+                    TmdbMovieContract.Entry._ID + "=?", new String[]{id});
                 break;
 
             case URI_MATCH_ARTICLE_WITH_MOVIE_ID:
@@ -141,19 +158,21 @@ public class TmdbMovieContentProvider extends ContentProvider {
                 String movie_id = uri.getLastPathSegment();
                 // Use selections/selectionArgs to filter for this ID
                 tasksDeleted = db.delete(TmdbMovieContract.Entry.TABLE_NAME,
-                        TmdbMovieContract.Entry.COLUMN_MOVIE_ID+"=?",
-                        new String[]{movie_id});
+                    TmdbMovieContract.Entry.MOVIE_ID + "=?", new
+                        String[]{movie_id});
                 break;
 
             case URI_MATCH_ARTICLE:
                 // Delete all
-                tasksDeleted = db.delete(TmdbMovieContract.Entry.TABLE_NAME, null, null);
+                tasksDeleted = db.delete(TmdbMovieContract.Entry.TABLE_NAME,
+                    null, null);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
-        // Notify the resolver of a change and return the number of items deleted
+        // Notify the resolver of a change and return the number of items
+        // deleted
         if (tasksDeleted != 0) {
             // A task was deleted, set notification
             getContext().getContentResolver().notifyChange(uri, null);
@@ -165,8 +184,8 @@ public class TmdbMovieContentProvider extends ContentProvider {
 
     // Implement query to handle requests for data by URI
     @Override
-    public Cursor query(@NonNull Uri uri, String[] projection, String selection,
-                        String[] selectionArgs, String sortOrder) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String
+        selection, String[] selectionArgs, String sortOrder) {
 
         // Get access to underlying database (read-only for query)
         final SQLiteDatabase db = mDbHelper.getReadableDatabase();
@@ -180,13 +199,9 @@ public class TmdbMovieContentProvider extends ContentProvider {
         switch (match) {
             // Query for the Articles directory
             case URI_MATCH_ARTICLE:
-                retCursor =  db.query(TmdbMovieContract.Entry.TABLE_NAME,
-                        projection,
-                        selection,
-                        selectionArgs,
-                        null,
-                        null,
-                        sortOrder);
+                retCursor = db.query(TmdbMovieContract.Entry.TABLE_NAME,
+                    projection, selection, selectionArgs, null, null,
+                    sortOrder);
                 break;
 
             case URI_MATCH_ARTICLE_WITH_ID:
@@ -195,13 +210,9 @@ public class TmdbMovieContentProvider extends ContentProvider {
 
                 retCursor = db.query(
                         /* Table we are going to query */
-                        TmdbMovieContract.Entry.TABLE_NAME,
-                        projection,
-                        TmdbMovieContract.Entry._ID + " = ? ",
-                        selectionArguments,
-                        null,
-                        null,
-                        sortOrder);
+                    TmdbMovieContract.Entry.TABLE_NAME, projection,
+                    TmdbMovieContract.Entry._ID + " = ? ",
+                    selectionArguments, null, null, sortOrder);
                 break;
 
             case URI_MATCH_ARTICLE_WITH_MOVIE_ID:
@@ -210,13 +221,9 @@ public class TmdbMovieContentProvider extends ContentProvider {
 
                 retCursor = db.query(
                         /* Table we are going to query */
-                        TmdbMovieContract.Entry.TABLE_NAME,
-                        projection,
-                        TmdbMovieContract.Entry.COLUMN_MOVIE_ID + " = ? ",
-                        selectionArguments,
-                        null,
-                        null,
-                        sortOrder);
+                    TmdbMovieContract.Entry.TABLE_NAME, projection,
+                    TmdbMovieContract.Entry.MOVIE_ID + " = ? ",
+                    selectionArguments, null, null, sortOrder);
                 break;
 
             // Default exception
@@ -232,8 +239,8 @@ public class TmdbMovieContentProvider extends ContentProvider {
     }
 
     @Override
-    public int update(@NonNull Uri uri, ContentValues values, String selection,
-                      String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String
+        selection, String[] selectionArgs) {
         // Get access to underlying database (read-only for query)
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
@@ -247,19 +254,17 @@ public class TmdbMovieContentProvider extends ContentProvider {
             case URI_MATCH_ARTICLE_WITH_MOVIE_ID:
                 String movie_id = uri.getLastPathSegment();
                 // Use selections/selectionArgs to filter for this ID
-                tasksUpdated =  db.update(TmdbMovieContract.Entry.TABLE_NAME,
-                        values,
-                        TmdbMovieContract.Entry.COLUMN_MOVIE_ID+"=?",
-                        new String[]{movie_id});
+                tasksUpdated = db.update(TmdbMovieContract.Entry.TABLE_NAME,
+                    values, TmdbMovieContract.Entry.MOVIE_ID + "=?",
+                    new String[]{movie_id});
                 break;
 
             case URI_MATCH_ARTICLE_WITH_ID:
                 String id = uri.getLastPathSegment();
                 // Use selections/selectionArgs to filter for this ID
-                tasksUpdated =  db.update(TmdbMovieContract.Entry.TABLE_NAME,
-                        values,
-                        TmdbMovieContract.Entry._ID+"=?",
-                        new String[]{id});
+                tasksUpdated = db.update(TmdbMovieContract.Entry.TABLE_NAME,
+                    values, TmdbMovieContract.Entry._ID + "=?", new
+                        String[]{id});
                 break;
 
             // Default exception
@@ -267,7 +272,8 @@ public class TmdbMovieContentProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
-        // Notify the resolver of a change and return the number of items deleted
+        // Notify the resolver of a change and return the number of items
+        // deleted
         if (tasksUpdated != 0) {
             // A task was deleted, set notification
             getContext().getContentResolver().notifyChange(uri, null);

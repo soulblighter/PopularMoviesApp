@@ -1,13 +1,14 @@
 package br.com.soulblighter.popularmoviesapp.json;
 
-import java.io.Serializable;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class TmdbReview implements Serializable, Parcelable
-{
+import java.io.Serializable;
+
+public class TmdbReview implements Serializable, Parcelable {
 
     @SerializedName("id")
     @Expose
@@ -26,12 +27,11 @@ public class TmdbReview implements Serializable, Parcelable
     public String url;
 
 
-    public final static Parcelable.Creator<TmdbReview> CREATOR = new Creator<TmdbReview>() {
+    public final static Parcelable.Creator<TmdbReview> CREATOR = new
+        Creator<TmdbReview>() {
 
 
-        @SuppressWarnings({
-                "unchecked"
-        })
+        @SuppressWarnings({"unchecked"})
         public TmdbReview createFromParcel(Parcel in) {
             return new TmdbReview(in);
         }
@@ -40,8 +40,7 @@ public class TmdbReview implements Serializable, Parcelable
             return (new TmdbReview[size]);
         }
 
-    }
-            ;
+    };
     private final static long serialVersionUID = -6456665049320540962L;
 
     protected TmdbReview(Parcel in) {

@@ -20,10 +20,11 @@ public class TmdbJsonUtils {
         JSONArray resultsArray = json.getJSONArray(TMDB_RESULT);
 
         Gson gson = new Gson();
-        List< TmdbMovie > itens = new ArrayList<>();
+        List<TmdbMovie> itens = new ArrayList<>();
 
         for (int i = 0; i < resultsArray.length(); i++) {
-            TmdbMovie item = gson.fromJson(String.valueOf(resultsArray.getJSONObject(i)), TmdbMovie.class);
+            TmdbMovie item = gson.fromJson(String.valueOf(resultsArray
+                    .getJSONObject(i)), TmdbMovie.class);
             itens.add(item);
         }
 
@@ -37,10 +38,11 @@ public class TmdbJsonUtils {
         JSONArray resultsArray = json.getJSONArray(TMDB_RESULT);
 
         Gson gson = new Gson();
-        List< TmdbReview > itens = new ArrayList<>();
+        List<TmdbReview> itens = new ArrayList<>();
 
         for (int i = 0; i < resultsArray.length(); i++) {
-            TmdbReview item = gson.fromJson(String.valueOf(resultsArray.getJSONObject(i)), TmdbReview.class);
+            TmdbReview item = gson.fromJson(String.valueOf(resultsArray
+                    .getJSONObject(i)), TmdbReview.class);
             itens.add(item);
         }
 
@@ -54,10 +56,11 @@ public class TmdbJsonUtils {
         JSONArray resultsArray = json.getJSONArray(TMDB_RESULT);
 
         Gson gson = new Gson();
-        List< TmdbTrailer > itens = new ArrayList<>();
+        List<TmdbTrailer> itens = new ArrayList<>();
 
         for (int i = 0; i < resultsArray.length(); i++) {
-            TmdbTrailer item = gson.fromJson(String.valueOf(resultsArray.getJSONObject(i)), TmdbTrailer.class);
+            TmdbTrailer item = gson.fromJson(String.valueOf(resultsArray
+                    .getJSONObject(i)), TmdbTrailer.class);
             itens.add(item);
         }
 

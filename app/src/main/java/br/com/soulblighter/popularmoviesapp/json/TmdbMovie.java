@@ -70,28 +70,40 @@ public class TmdbMovie implements Serializable, Parcelable {
     @Expose
     public String releaseDate;
 
-    public final static Parcelable.Creator<TmdbMovie> CREATOR = new Creator<TmdbMovie>() {
+    public final static Parcelable.Creator<TmdbMovie> CREATOR = new
+        Creator<TmdbMovie>() {
 
 
-        @SuppressWarnings({
-                "unchecked"
-        })
+        @SuppressWarnings({"unchecked"})
         public TmdbMovie createFromParcel(Parcel in) {
             TmdbMovie instance = new TmdbMovie();
-            instance.voteCount = ((int) in.readValue((int.class.getClassLoader())));
+            instance.voteCount = ((int) in.readValue((int.class
+                .getClassLoader())));
             instance.id = ((int) in.readValue((int.class.getClassLoader())));
-            instance.video = ((boolean) in.readValue((boolean.class.getClassLoader())));
-            instance.voteAverage = ((double) in.readValue((double.class.getClassLoader())));
-            instance.title = ((String) in.readValue((String.class.getClassLoader())));
-            instance.popularity = ((double) in.readValue((double.class.getClassLoader())));
-            instance.posterPath = ((String) in.readValue((String.class.getClassLoader())));
-            instance.originalLanguage = ((String) in.readValue((String.class.getClassLoader())));
-            instance.originalTitle = ((String) in.readValue((String.class.getClassLoader())));
-            in.readList(instance.genreIds, (java.lang.Integer.class.getClassLoader()));
-            instance.backdropPath = ((String) in.readValue((String.class.getClassLoader())));
-            instance.adult = ((boolean) in.readValue((boolean.class.getClassLoader())));
-            instance.overview = ((String) in.readValue((String.class.getClassLoader())));
-            instance.releaseDate = ((String) in.readValue((String.class.getClassLoader())));
+            instance.video = ((boolean) in.readValue((boolean.class
+                .getClassLoader())));
+            instance.voteAverage = ((double) in.readValue((double.class
+                .getClassLoader())));
+            instance.title = ((String) in.readValue((String.class
+                .getClassLoader())));
+            instance.popularity = ((double) in.readValue((double.class
+                .getClassLoader())));
+            instance.posterPath = ((String) in.readValue((String.class
+                .getClassLoader())));
+            instance.originalLanguage = ((String) in.readValue((String.class
+                .getClassLoader())));
+            instance.originalTitle = ((String) in.readValue((String.class
+                .getClassLoader())));
+            in.readList(instance.genreIds, (java.lang.Integer.class
+                .getClassLoader()));
+            instance.backdropPath = ((String) in.readValue((String.class
+                .getClassLoader())));
+            instance.adult = ((boolean) in.readValue((boolean.class
+                .getClassLoader())));
+            instance.overview = ((String) in.readValue((String.class
+                .getClassLoader())));
+            instance.releaseDate = ((String) in.readValue((String.class
+                .getClassLoader())));
             return instance;
         }
 
@@ -108,7 +120,11 @@ public class TmdbMovie implements Serializable, Parcelable {
     public TmdbMovie() {
     }
 
-    public TmdbMovie(int voteCount, int id, boolean video, double voteAverage, String title, double popularity, String posterPath, String originalLanguage, String originalTitle, List<Integer> genreIds, String backdropPath, boolean adult, String overview, String releaseDate) {
+    public TmdbMovie(int voteCount, int id, boolean video, double
+        voteAverage, String title, double popularity, String posterPath,
+                     String originalLanguage, String originalTitle,
+                     List<Integer> genreIds, String backdropPath, boolean
+                         adult, String overview, String releaseDate) {
         super();
         this.voteCount = voteCount;
         this.id = id;

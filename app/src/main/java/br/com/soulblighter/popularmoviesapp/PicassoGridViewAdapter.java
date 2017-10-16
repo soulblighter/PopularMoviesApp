@@ -14,12 +14,13 @@ import java.util.List;
 import br.com.soulblighter.popularmoviesapp.json.TmdbMovie;
 import br.com.soulblighter.popularmoviesapp.network.NetworkUtils;
 
-public class PicassoGridViewAdapter extends RecyclerView.Adapter<PicassoGridViewAdapter.ViewHolder> {
+public class PicassoGridViewAdapter extends RecyclerView
+    .Adapter<PicassoGridViewAdapter.ViewHolder> {
 
     private List<TmdbMovie> mData = null;
     private LayoutInflater mInflater;
     private PicassoClickListener mClickListener;
-    Context mContext;
+    private Context mContext;
 
     public PicassoGridViewAdapter(Context context, List<TmdbMovie> data) {
         mContext = context;
@@ -36,10 +37,8 @@ public class PicassoGridViewAdapter extends RecyclerView.Adapter<PicassoGridView
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         String posterPath = mData.get(position).posterPath;
-            Picasso.with(mContext)
-                    .load(NetworkUtils.buildImageUrl(posterPath))
-                    .placeholder(R.color.colorPrimary)
-                    .into(holder.imageView);
+        Picasso.with(mContext).load(NetworkUtils.buildImageUrl(posterPath))
+            .placeholder(R.color.colorPrimary).into(holder.imageView);
     }
 
     @Override
@@ -47,7 +46,8 @@ public class PicassoGridViewAdapter extends RecyclerView.Adapter<PicassoGridView
         return mData == null ? 0 : mData.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View
+        .OnClickListener {
         public ImageView imageView;
 
         public ViewHolder(View itemView) {
@@ -58,7 +58,8 @@ public class PicassoGridViewAdapter extends RecyclerView.Adapter<PicassoGridView
 
         @Override
         public void onClick(View view) {
-            if (mClickListener != null) mClickListener.onPicassoItemClick(view, getAdapterPosition());
+            if (mClickListener != null)
+                mClickListener.onPicassoItemClick(view, getAdapterPosition());
         }
     }
 

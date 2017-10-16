@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -19,7 +20,8 @@ public class NetworkUtils {
     private static final String TOP_RATED_PATH = "top_rated";
     private static final String REVIEWS_PATH = "reviews";
     private static final String TRAILERS_PATH = "videos";
-    private static final String IMAGE_TMDB_URL = "http://image.tmdb.org/t/p/w185/";
+    private static final String IMAGE_TMDB_URL = "http://image.tmdb" +
+        ".org/t/p/w185/";
 
     private static final String YOUTUBE_URL = "vnd.youtube:";
 
@@ -55,7 +57,7 @@ public class NetworkUtils {
     }
 
     public static String buildYoutubeUrl(String key) {
-        Uri.Builder builder = Uri.parse(YOUTUBE_URL+key).buildUpon();
+        Uri.Builder builder = Uri.parse(YOUTUBE_URL + key).buildUpon();
         return builder.build().toString();
     }
 
@@ -68,7 +70,8 @@ public class NetworkUtils {
     }
 
     public static String getResponseFromHttpUrl(URL url) throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        HttpURLConnection urlConnection = (HttpURLConnection) url
+            .openConnection();
         try {
             InputStream in = urlConnection.getInputStream();
 
@@ -86,10 +89,11 @@ public class NetworkUtils {
         }
     }
 
-    // https://stackoverflow.com/questions/1560788/how-to-check-internet-access-on-android-inetaddress-never-times-out
+    // https://stackoverflow.com/questions/1560788/how-to-check-internet
+    // -access-on-android-inetaddress-never-times-out
     public static boolean isOnline(Context context) {
-        ConnectivityManager cm =
-                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) context
+            .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }

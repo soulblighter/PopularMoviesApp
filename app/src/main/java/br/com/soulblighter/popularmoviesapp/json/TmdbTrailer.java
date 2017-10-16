@@ -1,13 +1,14 @@
 package br.com.soulblighter.popularmoviesapp.json;
 
-import java.io.Serializable;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class TmdbTrailer implements Serializable, Parcelable
-{
+import java.io.Serializable;
+
+public class TmdbTrailer implements Serializable, Parcelable {
 
     @SerializedName("id")
     @Expose
@@ -42,12 +43,11 @@ public class TmdbTrailer implements Serializable, Parcelable
     public String type;
 
 
-    public final static Parcelable.Creator<TmdbTrailer> CREATOR = new Creator<TmdbTrailer>() {
+    public final static Parcelable.Creator<TmdbTrailer> CREATOR = new
+        Creator<TmdbTrailer>() {
 
 
-        @SuppressWarnings({
-                "unchecked"
-        })
+        @SuppressWarnings({"unchecked"})
         public TmdbTrailer createFromParcel(Parcel in) {
             return new TmdbTrailer(in);
         }
@@ -56,14 +56,14 @@ public class TmdbTrailer implements Serializable, Parcelable
             return (new TmdbTrailer[size]);
         }
 
-    }
-            ;
+    };
     private final static long serialVersionUID = -6395529659010471108L;
 
     protected TmdbTrailer(Parcel in) {
         this.id = ((String) in.readValue((String.class.getClassLoader())));
         this.iso6391 = ((String) in.readValue((String.class.getClassLoader())));
-        this.iso31661 = ((String) in.readValue((String.class.getClassLoader())));
+        this.iso31661 = ((String) in.readValue((String.class.getClassLoader()
+        )));
         this.key = ((String) in.readValue((String.class.getClassLoader())));
         this.name = ((String) in.readValue((String.class.getClassLoader())));
         this.site = ((String) in.readValue((String.class.getClassLoader())));

@@ -13,7 +13,7 @@
         android:layout_margin="4dp"
         android:layout_gravity="center"
         android:src="@mipmap/ic_play"
-        app:srcCompat="@mipmap/ic_play"/>
+        app:srcCompat="@mipmap/ic_play" />
 
     <TextView
         android:id="@+id/tv_trailer"

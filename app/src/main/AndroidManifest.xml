@@ -21,7 +21,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".DetailActivity"
+        <activity
+            android:name=".DetailActivity"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -30,7 +31,8 @@
 
         <provider
             android:authorities="br.com.soulblighter.popularmoviesapp"
-            android:name=".provider.TmdbMovieContentProvider" android:exported="false" />
+            android:name=".provider.TmdbMovieContentProvider"
+            android:exported="false" />
     </application>
 
 </manifest>

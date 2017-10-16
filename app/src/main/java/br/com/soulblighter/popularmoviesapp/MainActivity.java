@@ -3,6 +3,7 @@ package br.com.soulblighter.popularmoviesapp;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -10,19 +11,20 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+
+import org.json.JSONException;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import br.com.soulblighter.popularmoviesapp.databinding.ActivityMainBinding;
 import br.com.soulblighter.popularmoviesapp.json.TmdbJsonUtils;
 import br.com.soulblighter.popularmoviesapp.json.TmdbMovie;
 import br.com.soulblighter.popularmoviesapp.network.NetworkUtils;
@@ -33,28 +35,23 @@ import static br.com.soulblighter.popularmoviesapp.MainActivity.ErrorType.NO_CON
 import static br.com.soulblighter.popularmoviesapp.MainActivity.ErrorType.PARSE_JSON;
 
 public class MainActivity extends AppCompatActivity implements
-        PicassoGridViewAdapter.PicassoClickListener,
-        LoaderManager.LoaderCallbacks {
+    PicassoGridViewAdapter.PicassoClickListener, LoaderManager.LoaderCallbacks {
 
-    public enum SortMethod {
-        SORT_POPULAR,
-        SORT_RATING,
-        LOCAL_FAVORITES
+    public enum TmdbDisplayType {
+        SORT_POPULAR, SORT_RATING, LOCAL_FAVORITES
     }
 
     public enum ErrorType {
-        NO_CONNECTION,
-        PARSE_JSON
+        NO_CONNECTION, PARSE_JSON
     }
 
-
     public static final String[] MAIN_TMDB_PROJECTION = {
-            TmdbMovieContract.Entry.COLUMN_MOVIE_ID,
-            TmdbMovieContract.Entry.COLUMN_TITLE,
-            TmdbMovieContract.Entry.COLUMN_POSTER_PATH,
-            TmdbMovieContract.Entry.COLUMN_RELEASE_DATE,
-            TmdbMovieContract.Entry.COLUMN_VOTE_AVERAGE,
-            TmdbMovieContract.Entry.COLUMN_OVERVIEW,
+        TmdbMovieContract.Entry.MOVIE_ID,
+        TmdbMovieContract.Entry.TITLE,
+        TmdbMovieContract.Entry.POSTER_PATH,
+        TmdbMovieContract.Entry.RELEASE_DATE,
+        TmdbMovieContract.Entry.VOTE_AVERAGE,
+        TmdbMovieContract.Entry.OVERVIEW
     };
 
     public static final int INDEX_TMDB_MOVIE_ID = 0;
@@ -64,59 +61,74 @@ public class MainActivity extends AppCompatActivity implements
     public static final int INDEX_TMDB_VOTE_AVERAGE = 4;
     public static final int INDEX_TMDB_OVERVIEW = 5;
 
-
-
-
     private static final int ID_LOADER_MAIN = 101;
     private static final int ID_LOADER_FAVORITES = 102;
 
+    private TmdbDisplayType mTmdbDisplayTypeSelected = TmdbDisplayType
+        .SORT_POPULAR;
+    private static final String EXTRA_DISPLAY_TYPE = "display_type";
+    private static final String EXTRA_GRID_SATE = "gridstate";
 
-    private SortMethod sortMethodSelected = SortMethod.SORT_POPULAR;
-    private static final String EXTRA_SORT_METHOD = "sort_method";
-
-    private RecyclerView rv_gridview;
-    private TextView tv_error_box;
+    private ActivityMainBinding mBinding;
     private PicassoGridViewAdapter mAdapter;
+    StaggeredGridLayoutManager mLayoutManager;
+    Parcelable mGridState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if(savedInstanceState != null && savedInstanceState.containsKey(EXTRA_SORT_METHOD)) {
-            sortMethodSelected = SortMethod.values()[savedInstanceState.getInt(EXTRA_SORT_METHOD)];
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+
+        if (savedInstanceState != null && savedInstanceState.containsKey
+            (EXTRA_DISPLAY_TYPE)) {
+            mTmdbDisplayTypeSelected = TmdbDisplayType.values()
+                [savedInstanceState.getInt(EXTRA_DISPLAY_TYPE)];
         }
 
         mAdapter = new PicassoGridViewAdapter(this, null);
         mAdapter.setClickListener(this);
 
-        rv_gridview = (RecyclerView) findViewById(R.id.rv_gridview);
-        tv_error_box = (TextView) findViewById(R.id.tv_error_box);
-
         int display_mode = getResources().getConfiguration().orientation;
 
         if (display_mode == Configuration.ORIENTATION_PORTRAIT) {
-            rv_gridview.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+            mLayoutManager = new
+                StaggeredGridLayoutManager(2, StaggeredGridLayoutManager
+                .VERTICAL);
+            mBinding.recyclerGridView.setLayoutManager(mLayoutManager);
         } else {
-            rv_gridview.setLayoutManager(new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL));
+            mLayoutManager = new
+                StaggeredGridLayoutManager(3, StaggeredGridLayoutManager
+                .VERTICAL);
+            mBinding.recyclerGridView.setLayoutManager(mLayoutManager);
         }
 
-        rv_gridview.setAdapter(mAdapter);
-
-
+        mBinding.recyclerGridView.setAdapter(mAdapter);
         loadData();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(EXTRA_SORT_METHOD, sortMethodSelected.ordinal());
+        mGridState = mBinding.recyclerGridView.getLayoutManager()
+            .onSaveInstanceState();
+        outState.putParcelable(EXTRA_GRID_SATE, mGridState);
+
+        outState.putInt(EXTRA_DISPLAY_TYPE, mTmdbDisplayTypeSelected.ordinal());
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        mGridState = savedInstanceState.getParcelable(EXTRA_GRID_SATE);
     }
 
     public void onPicassoItemClick(View view, int position) {
         Intent intent = new Intent(getBaseContext(), DetailActivity.class);
         TmdbMovie movie = mAdapter.getItem(position);
-        intent.putExtra(DetailActivity.EXTRA_MOVIE, (Parcelable)movie);
+        intent.putExtra(DetailActivity.EXTRA_MOVIE, (Parcelable) movie);
         startActivity(intent);
     }
 
@@ -130,17 +142,17 @@ public class MainActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_sort_popular:
-                sortMethodSelected = SortMethod.SORT_POPULAR;
+                mTmdbDisplayTypeSelected = TmdbDisplayType.SORT_POPULAR;
                 loadData();
                 break;
 
             case R.id.menu_sort_rate:
-                sortMethodSelected = SortMethod.SORT_RATING;
+                mTmdbDisplayTypeSelected = TmdbDisplayType.SORT_RATING;
                 loadData();
                 break;
 
             case R.id.menu_show_favorites:
-                sortMethodSelected = SortMethod.LOCAL_FAVORITES;
+                mTmdbDisplayTypeSelected = TmdbDisplayType.LOCAL_FAVORITES;
                 loadData();
                 break;
 
@@ -152,32 +164,31 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void showDataGrid() {
-        rv_gridview.setVisibility(View.VISIBLE);
-        tv_error_box.setVisibility(View.GONE);
+        mBinding.recyclerGridView.setVisibility(View.VISIBLE);
+        mBinding.errorBox.setVisibility(View.GONE);
     }
 
     private void showError(ErrorType error) {
-        rv_gridview.setVisibility(View.GONE);
-        tv_error_box.setVisibility(View.VISIBLE);
+        mBinding.recyclerGridView.setVisibility(View.GONE);
+        mBinding.errorBox.setVisibility(View.VISIBLE);
         switch (error) {
             case NO_CONNECTION:
-                tv_error_box.setText(R.string.error_no_network);
+                mBinding.errorBox.setText(R.string.error_no_network);
                 break;
             case PARSE_JSON:
             default:
-                tv_error_box.setText(R.string.error_parse_json);
+                mBinding.errorBox.setText(R.string.error_parse_json);
                 break;
         }
     }
-
-
 
     @Override
     public Loader onCreateLoader(int loaderId, Bundle bundle) {
 
         switch (loaderId) {
             case ID_LOADER_MAIN:
-                SortMethod method = SortMethod.values()[bundle.getInt(EXTRA_SORT_METHOD)];
+                TmdbDisplayType method = TmdbDisplayType.values()[bundle
+                    .getInt(EXTRA_DISPLAY_TYPE)];
 
                 String url = null;
                 switch (method) {
@@ -194,17 +205,15 @@ public class MainActivity extends AppCompatActivity implements
                 /* URI for all rows of weather data in our weather table */
                 Uri queryUri = TmdbMovieContract.Entry.CONTENT_URI;
                 /* Sort order: Ascending by date */
-                String sortOrder = TmdbMovieContract.Entry.COLUMN_MOVIE_ID + " DESC";
+                String sortOrder = TmdbMovieContract.Entry.MOVIE_ID +
+                    " DESC";
 
-                return new CursorLoader(this,
-                        queryUri,
-                        MAIN_TMDB_PROJECTION,
-                        null,
-                        null,
-                        sortOrder);
+                return new CursorLoader(this, queryUri, MAIN_TMDB_PROJECTION,
+                    null, null, sortOrder);
 
             default:
-                throw new RuntimeException("Loader Not Implemented: " + loaderId);
+                throw new RuntimeException("Loader Not Implemented: " +
+                    loaderId);
         }
     }
 
@@ -216,95 +225,116 @@ public class MainActivity extends AppCompatActivity implements
         switch (loaderId) {
             case ID_LOADER_MAIN:
                 if (data != null) {
-                    showDataGrid();
+                    List<TmdbMovie> movies;
                     try {
-                        mAdapter.setData(TmdbJsonUtils.getTmdbMoviesFromJson((String)data));
-                        mAdapter.notifyDataSetChanged();
-                    } catch (Exception e) {
+                        movies = TmdbJsonUtils.getTmdbMoviesFromJson(
+                            (String) data);
+                        showDataGrid();
+                        updateData(movies);
+                    } catch (JSONException e) {
                         e.printStackTrace();
                         showError(PARSE_JSON);
                     }
                 } else {
                     showError(PARSE_JSON);
-                    //Toast.makeText(MainActivity.this, R.string.error_parse_json, Toast.LENGTH_SHORT).show();
-                    Log.e(this.getClass().getSimpleName(), "onPostExecute: parsedData is null");
+                    //Toast.makeText(MainActivity.this, R.string
+                    // .error_parse_json, Toast.LENGTH_SHORT).show();
+                    Log.e(this.getClass().getSimpleName(), "onPostExecute: " +
+                        "parsedData is null");
                 }
                 break;
 
             case ID_LOADER_FAVORITES:
-                Cursor cursor = (Cursor)data;
-                List< TmdbMovie > movies = new ArrayList<>();
-                for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                    TmdbMovie movie = new TmdbMovie();
-                    movie.id = cursor.getInt(INDEX_TMDB_MOVIE_ID);
-                    movie.title = cursor.getString(INDEX_TMDB_TITLE);
-                    movie.posterPath = cursor.getString(INDEX_TMDB_POSTER_PATH);
-                    Date date = new Date(cursor.getLong(INDEX_TMDB_RELEASE_DATE));
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    movie.releaseDate = sdf.format(date);
-                    movie.voteAverage = cursor.getDouble(INDEX_TMDB_VOTE_AVERAGE);
-                    movie.overview = cursor.getString(INDEX_TMDB_OVERVIEW);
-                    movies.add(movie);
-                }
-
-                if (data != null) {
-                    showDataGrid();
-                    try {
-                        mAdapter.setData(movies);
-                        mAdapter.notifyDataSetChanged();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        showError(PARSE_JSON);
+                Cursor cursor = (Cursor) data;
+                if (cursor != null) {
+                    List<TmdbMovie> movies = new ArrayList<>();
+                    for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor
+                        .moveToNext()) {
+                        TmdbMovie movie = new TmdbMovie();
+                        movie.id = cursor.getInt(INDEX_TMDB_MOVIE_ID);
+                        movie.title = cursor.getString(INDEX_TMDB_TITLE);
+                        movie.posterPath = cursor.getString
+                            (INDEX_TMDB_POSTER_PATH);
+                        Date date = new Date(cursor.getLong
+                            (INDEX_TMDB_RELEASE_DATE));
+                        SimpleDateFormat sdf = new SimpleDateFormat
+                            ("yyyy-MM-dd");
+                        movie.releaseDate = sdf.format(date);
+                        movie.voteAverage = cursor.getDouble
+                            (INDEX_TMDB_VOTE_AVERAGE);
+                        movie.overview = cursor.getString(INDEX_TMDB_OVERVIEW);
+                        movies.add(movie);
                     }
+
+                    showDataGrid();
+                    updateData(movies);
+
+                    cursor.close();
                 } else {
                     showError(PARSE_JSON);
-                    Log.e(this.getClass().getSimpleName(), "onPostExecute: parsedData is null");
+                    Log.e(this.getClass().getSimpleName(), "onPostExecute: " +
+                        "parsedData is null");
                 }
-
 
                 break;
 
             default:
-                throw new RuntimeException("Loader Not Implemented: " + loaderId);
+                throw new RuntimeException("Loader Not Implemented: " +
+                    loaderId);
+        }
+
+
+    }
+
+
+    private void updateData(List<TmdbMovie> data) {
+        mAdapter.setData(data);
+        mAdapter.notifyDataSetChanged();
+        if (mGridState != null) {
+            mBinding.recyclerGridView.getLayoutManager()
+                .onRestoreInstanceState(mGridState);
         }
     }
+
 
     @Override
     public void onLoaderReset(Loader loader) {
     }
 
-
     private void loadData() {
         LoaderManager loaderManager = getSupportLoaderManager();
-        switch (sortMethodSelected) {
+        switch (mTmdbDisplayTypeSelected) {
             case SORT_POPULAR:
             case SORT_RATING:
 
-                if(!NetworkUtils.isOnline(this)) {
+                if (!NetworkUtils.isOnline(this)) {
                     showError(NO_CONNECTION);
                     return;
                 }
 
                 Bundle loaderBundle = new Bundle();
-                loaderBundle.putInt(EXTRA_SORT_METHOD, sortMethodSelected.ordinal());
+                loaderBundle.putInt(EXTRA_DISPLAY_TYPE,
+                    mTmdbDisplayTypeSelected.ordinal());
 
                 Loader mainLoader = loaderManager.getLoader(ID_LOADER_MAIN);
                 if (mainLoader == null) {
-                    loaderManager.initLoader(ID_LOADER_MAIN, loaderBundle, this);
+                    loaderManager.initLoader(ID_LOADER_MAIN, loaderBundle,
+                        this);
                 } else {
-                    loaderManager.restartLoader(ID_LOADER_MAIN, loaderBundle, this);
+                    loaderManager.restartLoader(ID_LOADER_MAIN, loaderBundle,
+                        this);
                 }
                 break;
 
             case LOCAL_FAVORITES:
-                Loader favoritesLoader = loaderManager.getLoader(ID_LOADER_FAVORITES);
+                Loader favoritesLoader = loaderManager.getLoader
+                    (ID_LOADER_FAVORITES);
                 if (favoritesLoader == null) {
                     loaderManager.initLoader(ID_LOADER_FAVORITES, null, this);
                 } else {
-                    loaderManager.restartLoader(ID_LOADER_FAVORITES, null, this);
+                    loaderManager.restartLoader(ID_LOADER_FAVORITES, null,
+                        this);
                 }
         }
-
     }
-
 }
