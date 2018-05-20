@@ -12,16 +12,16 @@ import br.com.soulblighter.popularmoviesapp.json.TmdbMovie;
 public class TmdbMovieContract {
 
     public static final String AUTHORITY = "br.com.soulblighter" +
-        ".popularmoviesapp";
+            ".popularmoviesapp";
 
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" +
-        AUTHORITY);
+            AUTHORITY);
 
     public static final String PATH_ARTICLES = "movie";
 
     public static final class Entry implements BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
-            .appendPath(PATH_ARTICLES).build();
+                .appendPath(PATH_ARTICLES).build();
 
         public static final String TABLE_NAME = "movie";
 
@@ -34,24 +34,24 @@ public class TmdbMovieContract {
         public static final String OVERVIEW = "overview";
 
         public static final String CREATE_TABLE =
-            "CREATE TABLE " + TABLE_NAME + " (" +
-                _ID + " INTEGER PRIMARY KEY, " +
-                MOVIE_ID + " LONG NOT NULL UNIQUE ON CONFLICT IGNORE, " +
-                TITLE + " TEXT NOT NULL, " +
-                POSTER_PATH + " TEXT NOT NULL, " +
-                BACKDROP_PATH + " TEXT, " +
-                VOTE_AVERAGE + " REAL NOT NULL, " +
-                RELEASE_DATE + " LONG NOT NULL, " +
-                OVERVIEW + " TEXT NOT NULL );";
+                "CREATE TABLE " + TABLE_NAME + " (" +
+                        _ID + " INTEGER PRIMARY KEY, " +
+                        MOVIE_ID + " LONG NOT NULL UNIQUE ON CONFLICT IGNORE, " +
+                        TITLE + " TEXT NOT NULL, " +
+                        POSTER_PATH + " TEXT NOT NULL, " +
+                        BACKDROP_PATH + " TEXT, " +
+                        VOTE_AVERAGE + " REAL NOT NULL, " +
+                        RELEASE_DATE + " LONG NOT NULL, " +
+                        OVERVIEW + " TEXT NOT NULL );";
 
         public static Uri buildUriWithTableId(long id) {
             return CONTENT_URI.buildUpon().appendPath(_ID).appendPath(Long
-                .toString(id)).build();
+                    .toString(id)).build();
         }
 
         public static Uri buildUriWithMovieId(long id) {
             return CONTENT_URI.buildUpon().appendPath(Long.toString(id))
-                .build();
+                    .build();
         }
     }
 
@@ -70,14 +70,14 @@ public class TmdbMovieContract {
 
     static public boolean unmarkAsFavorite(Context context, TmdbMovie movie) {
         return context.getContentResolver().delete(Entry.buildUriWithMovieId
-            (movie.id), null, null) > 0;
+                (movie.id), null, null) > 0;
     }
 
     static public boolean isFavorite(Context context, TmdbMovie movie) {
         Cursor c = null;
         try {
             c = context.getContentResolver().query(Entry.buildUriWithMovieId
-                (movie.id), null, null, null, null);
+                    (movie.id), null, null, null, null);
             return c.getCount() > 0;
         } finally {
             if (c != null) {

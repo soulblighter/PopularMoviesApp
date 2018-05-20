@@ -7,35 +7,34 @@ import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-
-import org.json.JSONException;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import br.com.soulblighter.popularmoviesapp.databinding.ActivityMainBinding;
-import br.com.soulblighter.popularmoviesapp.json.TmdbJsonUtils;
 import br.com.soulblighter.popularmoviesapp.json.TmdbMovie;
+import br.com.soulblighter.popularmoviesapp.json.TmdbMovieResp;
 import br.com.soulblighter.popularmoviesapp.network.NetworkUtils;
-import br.com.soulblighter.popularmoviesapp.network.TmdbApiAsyncTaskLoader;
 import br.com.soulblighter.popularmoviesapp.provider.TmdbMovieContract;
+import br.com.soulblighter.popularmoviesapp.retrofit.TmdbRetrofitConfig;
+import br.com.soulblighter.popularmoviesapp.retrofit.TmdbService;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 
 import static br.com.soulblighter.popularmoviesapp.MainActivity.ErrorType.NO_CONNECTION;
-import static br.com.soulblighter.popularmoviesapp.MainActivity.ErrorType.PARSE_JSON;
 
-public class MainActivity extends AppCompatActivity implements
-    PicassoGridViewAdapter.PicassoClickListener, LoaderManager.LoaderCallbacks {
+public class MainActivity extends AppCompatActivity
+        implements PicassoGridViewAdapter.PicassoClickListener {
 
     public enum TmdbDisplayType {
         SORT_POPULAR, SORT_RATING, LOCAL_FAVORITES
@@ -46,12 +45,12 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     public static final String[] MAIN_TMDB_PROJECTION = {
-        TmdbMovieContract.Entry.MOVIE_ID,
-        TmdbMovieContract.Entry.TITLE,
-        TmdbMovieContract.Entry.POSTER_PATH,
-        TmdbMovieContract.Entry.RELEASE_DATE,
-        TmdbMovieContract.Entry.VOTE_AVERAGE,
-        TmdbMovieContract.Entry.OVERVIEW
+            TmdbMovieContract.Entry.MOVIE_ID,
+            TmdbMovieContract.Entry.TITLE,
+            TmdbMovieContract.Entry.POSTER_PATH,
+            TmdbMovieContract.Entry.RELEASE_DATE,
+            TmdbMovieContract.Entry.VOTE_AVERAGE,
+            TmdbMovieContract.Entry.OVERVIEW
     };
 
     public static final int INDEX_TMDB_MOVIE_ID = 0;
@@ -61,18 +60,20 @@ public class MainActivity extends AppCompatActivity implements
     public static final int INDEX_TMDB_VOTE_AVERAGE = 4;
     public static final int INDEX_TMDB_OVERVIEW = 5;
 
-    private static final int ID_LOADER_MAIN = 101;
-    private static final int ID_LOADER_FAVORITES = 102;
-
     private TmdbDisplayType mTmdbDisplayTypeSelected = TmdbDisplayType
-        .SORT_POPULAR;
+            .SORT_POPULAR;
     private static final String EXTRA_DISPLAY_TYPE = "display_type";
     private static final String EXTRA_GRID_SATE = "gridstate";
 
     private ActivityMainBinding mBinding;
     private PicassoGridViewAdapter mAdapter;
-    StaggeredGridLayoutManager mLayoutManager;
-    Parcelable mGridState;
+    private StaggeredGridLayoutManager mLayoutManager;
+    private Parcelable mGridState;
+
+    private TmdbService mTmdbService;
+    private DisposableSingleObserver<TmdbMovieResp> mFavoritesDisposable = null;
+    private DisposableSingleObserver<TmdbMovieResp> mPopularDisposable = null;
+    private DisposableSingleObserver<TmdbMovieResp> mTopRatedDisposable = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,9 +83,9 @@ public class MainActivity extends AppCompatActivity implements
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         if (savedInstanceState != null && savedInstanceState.containsKey
-            (EXTRA_DISPLAY_TYPE)) {
+                (EXTRA_DISPLAY_TYPE)) {
             mTmdbDisplayTypeSelected = TmdbDisplayType.values()
-                [savedInstanceState.getInt(EXTRA_DISPLAY_TYPE)];
+                    [savedInstanceState.getInt(EXTRA_DISPLAY_TYPE)];
         }
 
         mAdapter = new PicassoGridViewAdapter(this, null);
@@ -94,24 +95,40 @@ public class MainActivity extends AppCompatActivity implements
 
         if (display_mode == Configuration.ORIENTATION_PORTRAIT) {
             mLayoutManager = new
-                StaggeredGridLayoutManager(2, StaggeredGridLayoutManager
-                .VERTICAL);
+                    StaggeredGridLayoutManager(2, StaggeredGridLayoutManager
+                    .VERTICAL);
             mBinding.recyclerGridView.setLayoutManager(mLayoutManager);
         } else {
             mLayoutManager = new
-                StaggeredGridLayoutManager(3, StaggeredGridLayoutManager
-                .VERTICAL);
+                    StaggeredGridLayoutManager(3, StaggeredGridLayoutManager
+                    .VERTICAL);
             mBinding.recyclerGridView.setLayoutManager(mLayoutManager);
         }
 
         mBinding.recyclerGridView.setAdapter(mAdapter);
+
+        mTmdbService = new TmdbRetrofitConfig().getTmdbService();
         loadData();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(mFavoritesDisposable != null && !mFavoritesDisposable.isDisposed()) {
+            mFavoritesDisposable.dispose();
+        }
+        if(mPopularDisposable != null && !mPopularDisposable.isDisposed()) {
+            mPopularDisposable.dispose();
+        }
+        if(mTopRatedDisposable != null && !mTopRatedDisposable.isDisposed()) {
+            mTopRatedDisposable.dispose();
+        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         mGridState = mBinding.recyclerGridView.getLayoutManager()
-            .onSaveInstanceState();
+                .onSaveInstanceState();
         outState.putParcelable(EXTRA_GRID_SATE, mGridState);
 
         outState.putInt(EXTRA_DISPLAY_TYPE, mTmdbDisplayTypeSelected.ordinal());
@@ -182,159 +199,119 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    @Override
-    public Loader onCreateLoader(int loaderId, Bundle bundle) {
-
-        switch (loaderId) {
-            case ID_LOADER_MAIN:
-                TmdbDisplayType method = TmdbDisplayType.values()[bundle
-                    .getInt(EXTRA_DISPLAY_TYPE)];
-
-                String url = null;
-                switch (method) {
-                    case SORT_POPULAR:
-                        url = NetworkUtils.buildPopularUrl();
-                        break;
-                    case SORT_RATING:
-                        url = NetworkUtils.buildTopRatedUrl();
-                        break;
-                }
-                return new TmdbApiAsyncTaskLoader(this, url);
-
-            case ID_LOADER_FAVORITES:
-                /* URI for all rows of weather data in our weather table */
-                Uri queryUri = TmdbMovieContract.Entry.CONTENT_URI;
-                /* Sort order: Ascending by date */
-                String sortOrder = TmdbMovieContract.Entry.MOVIE_ID +
-                    " DESC";
-
-                return new CursorLoader(this, queryUri, MAIN_TMDB_PROJECTION,
-                    null, null, sortOrder);
-
-            default:
-                throw new RuntimeException("Loader Not Implemented: " +
-                    loaderId);
-        }
+    private void showError(String error) {
+        mBinding.recyclerGridView.setVisibility(View.GONE);
+        mBinding.errorBox.setVisibility(View.VISIBLE);
+        mBinding.errorBox.setText(error);
     }
-
-    @Override
-    public void onLoadFinished(Loader loader, Object data) {
-
-        int loaderId = loader.getId();
-
-        switch (loaderId) {
-            case ID_LOADER_MAIN:
-                if (data != null) {
-                    List<TmdbMovie> movies;
-                    try {
-                        movies = TmdbJsonUtils.getTmdbMoviesFromJson(
-                            (String) data);
-                        showDataGrid();
-                        updateData(movies);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        showError(PARSE_JSON);
-                    }
-                } else {
-                    showError(PARSE_JSON);
-                    //Toast.makeText(MainActivity.this, R.string
-                    // .error_parse_json, Toast.LENGTH_SHORT).show();
-                    Log.e(this.getClass().getSimpleName(), "onPostExecute: " +
-                        "parsedData is null");
-                }
-                break;
-
-            case ID_LOADER_FAVORITES:
-                Cursor cursor = (Cursor) data;
-                if (cursor != null) {
-                    List<TmdbMovie> movies = new ArrayList<>();
-                    for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor
-                        .moveToNext()) {
-                        TmdbMovie movie = new TmdbMovie();
-                        movie.id = cursor.getInt(INDEX_TMDB_MOVIE_ID);
-                        movie.title = cursor.getString(INDEX_TMDB_TITLE);
-                        movie.posterPath = cursor.getString
-                            (INDEX_TMDB_POSTER_PATH);
-                        Date date = new Date(cursor.getLong
-                            (INDEX_TMDB_RELEASE_DATE));
-                        SimpleDateFormat sdf = new SimpleDateFormat
-                            ("yyyy-MM-dd");
-                        movie.releaseDate = sdf.format(date);
-                        movie.voteAverage = cursor.getDouble
-                            (INDEX_TMDB_VOTE_AVERAGE);
-                        movie.overview = cursor.getString(INDEX_TMDB_OVERVIEW);
-                        movies.add(movie);
-                    }
-
-                    showDataGrid();
-                    updateData(movies);
-
-                    cursor.close();
-                } else {
-                    showError(PARSE_JSON);
-                    Log.e(this.getClass().getSimpleName(), "onPostExecute: " +
-                        "parsedData is null");
-                }
-
-                break;
-
-            default:
-                throw new RuntimeException("Loader Not Implemented: " +
-                    loaderId);
-        }
-
-
-    }
-
 
     private void updateData(List<TmdbMovie> data) {
         mAdapter.setData(data);
         mAdapter.notifyDataSetChanged();
         if (mGridState != null) {
             mBinding.recyclerGridView.getLayoutManager()
-                .onRestoreInstanceState(mGridState);
+                    .onRestoreInstanceState(mGridState);
         }
     }
 
-
-    @Override
-    public void onLoaderReset(Loader loader) {
-    }
-
     private void loadData() {
-        LoaderManager loaderManager = getSupportLoaderManager();
         switch (mTmdbDisplayTypeSelected) {
-            case SORT_POPULAR:
             case SORT_RATING:
-
                 if (!NetworkUtils.isOnline(this)) {
                     showError(NO_CONNECTION);
                     return;
                 }
 
-                Bundle loaderBundle = new Bundle();
-                loaderBundle.putInt(EXTRA_DISPLAY_TYPE,
-                    mTmdbDisplayTypeSelected.ordinal());
-
-                Loader mainLoader = loaderManager.getLoader(ID_LOADER_MAIN);
-                if (mainLoader == null) {
-                    loaderManager.initLoader(ID_LOADER_MAIN, loaderBundle,
-                        this);
-                } else {
-                    loaderManager.restartLoader(ID_LOADER_MAIN, loaderBundle,
-                        this);
+                if(mTopRatedDisposable != null && !mTopRatedDisposable.isDisposed()) {
+                    mTopRatedDisposable.dispose();
                 }
+                mTopRatedDisposable = getMovieObserver();
+                mTmdbService.getMovie(TmdbService.TOP_RATED_PATH, BuildConfig.API_KEY)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(getMovieObserver());
+                break;
+
+            case SORT_POPULAR:
+                if (!NetworkUtils.isOnline(this)) {
+                    showError(NO_CONNECTION);
+                    return;
+                }
+
+                if(mPopularDisposable != null && !mPopularDisposable.isDisposed()) {
+                    mPopularDisposable.dispose();
+                }
+                mPopularDisposable = getMovieObserver();
+                mTmdbService.getMovie(TmdbService.POPULAR_PATH, BuildConfig.API_KEY)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(mPopularDisposable);
                 break;
 
             case LOCAL_FAVORITES:
-                Loader favoritesLoader = loaderManager.getLoader
-                    (ID_LOADER_FAVORITES);
-                if (favoritesLoader == null) {
-                    loaderManager.initLoader(ID_LOADER_FAVORITES, null, this);
-                } else {
-                    loaderManager.restartLoader(ID_LOADER_FAVORITES, null,
-                        this);
+
+                if(mFavoritesDisposable != null && !mFavoritesDisposable.isDisposed()) {
+                    mFavoritesDisposable.dispose();
                 }
+                mFavoritesDisposable = getMovieObserver();
+                Single.fromCallable(() -> {
+                    // URI for all rows of weather data in our weather table
+                    Uri queryUri = TmdbMovieContract.Entry.CONTENT_URI;
+                    // Sort order: Ascending by date
+                    String sortOrder = TmdbMovieContract.Entry.MOVIE_ID +
+                            " DESC";
+
+                    Cursor cursor = getContentResolver().query( queryUri,
+                            MAIN_TMDB_PROJECTION,
+                            null,
+                            null,
+                            sortOrder);
+
+                    TmdbMovieResp tmdbMovieResp = new TmdbMovieResp();
+                    List<TmdbMovie> movies = null;
+                    if (cursor != null) {
+                        movies = new ArrayList<>();
+                        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor
+                                .moveToNext()) {
+                            TmdbMovie movie = new TmdbMovie();
+                            movie.id = cursor.getInt(INDEX_TMDB_MOVIE_ID);
+                            movie.title = cursor.getString(INDEX_TMDB_TITLE);
+                            movie.posterPath = cursor.getString
+                                    (INDEX_TMDB_POSTER_PATH);
+                            Date date = new Date(cursor.getLong
+                                    (INDEX_TMDB_RELEASE_DATE));
+                            SimpleDateFormat sdf = new SimpleDateFormat
+                                    ("yyyy-MM-dd", Locale.ENGLISH);
+                            movie.releaseDate = sdf.format(date);
+                            movie.voteAverage = cursor.getDouble
+                                    (INDEX_TMDB_VOTE_AVERAGE);
+                            movie.overview = cursor.getString(INDEX_TMDB_OVERVIEW);
+                            movies.add(movie);
+                        }
+                        tmdbMovieResp.results = movies;
+                    }
+                    return tmdbMovieResp;
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(mFavoritesDisposable);
         }
     }
+
+    DisposableSingleObserver<TmdbMovieResp> getMovieObserver() {
+        return new DisposableSingleObserver<TmdbMovieResp>() {
+            @Override
+            public void onSuccess(TmdbMovieResp movies) {
+                showDataGrid();
+                updateData(movies.results);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                e.printStackTrace();
+                showError(e.getLocalizedMessage());
+            }
+        };
+    }
+
 }

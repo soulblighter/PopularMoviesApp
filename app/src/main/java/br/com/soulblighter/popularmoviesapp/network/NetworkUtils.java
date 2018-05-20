@@ -20,14 +20,34 @@ public class NetworkUtils {
     private static final String TOP_RATED_PATH = "top_rated";
     private static final String REVIEWS_PATH = "reviews";
     private static final String TRAILERS_PATH = "videos";
-    private static final String IMAGE_TMDB_URL = "http://image.tmdb" +
-        ".org/t/p/w185/";
+    private static final String IMAGE_TMDB_URL = "http://image.tmdb.org/t/p/w185/";
 
     private static final String YOUTUBE_URL = "vnd.youtube:";
 
     private final static String API_KEY_PARAM = "api_key";
     private final static String API_KEY_VALUE = BuildConfig.API_KEY;
 
+    // https://stackoverflow.com/questions/1560788/how-to-check-internet
+    // -access-on-android-inetaddress-never-times-out
+    public static boolean isOnline(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
+    public static String buildImageUrl(String image) {
+        Uri.Builder builder = Uri.parse(IMAGE_TMDB_URL).buildUpon();
+        builder.appendEncodedPath(image);
+        return builder.build().toString();
+    }
+
+    public static String buildYoutubeUrl(String key) {
+        Uri.Builder builder = Uri.parse(YOUTUBE_URL + key).buildUpon();
+        return builder.build().toString();
+    }
+
+/*
     public static String buildPopularUrl() {
         Uri.Builder builder = Uri.parse(BASE_URL).buildUpon();
         builder.appendPath(POPULAR_PATH);
@@ -42,22 +62,11 @@ public class NetworkUtils {
         return builder.build().toString();
     }
 
-    public static String buildImageUrl(String image) {
-        Uri.Builder builder = Uri.parse(IMAGE_TMDB_URL).buildUpon();
-        builder.appendEncodedPath(image);
-        return builder.build().toString();
-    }
-
     public static String buildTrailersUrl(long movieId) {
         Uri.Builder builder = Uri.parse(BASE_URL).buildUpon();
         builder.appendPath(String.valueOf(movieId));
         builder.appendPath(TRAILERS_PATH);
         builder.appendQueryParameter(API_KEY_PARAM, API_KEY_VALUE);
-        return builder.build().toString();
-    }
-
-    public static String buildYoutubeUrl(String key) {
-        Uri.Builder builder = Uri.parse(YOUTUBE_URL + key).buildUpon();
         return builder.build().toString();
     }
 
@@ -71,7 +80,7 @@ public class NetworkUtils {
 
     public static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url
-            .openConnection();
+                .openConnection();
         try {
             InputStream in = urlConnection.getInputStream();
 
@@ -88,14 +97,5 @@ public class NetworkUtils {
             urlConnection.disconnect();
         }
     }
-
-    // https://stackoverflow.com/questions/1560788/how-to-check-internet
-    // -access-on-android-inetaddress-never-times-out
-    public static boolean isOnline(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context
-            .getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
-    }
-
+*/
 }

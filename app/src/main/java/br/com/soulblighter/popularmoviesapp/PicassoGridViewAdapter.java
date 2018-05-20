@@ -15,7 +15,7 @@ import br.com.soulblighter.popularmoviesapp.json.TmdbMovie;
 import br.com.soulblighter.popularmoviesapp.network.NetworkUtils;
 
 public class PicassoGridViewAdapter extends RecyclerView
-    .Adapter<PicassoGridViewAdapter.ViewHolder> {
+        .Adapter<PicassoGridViewAdapter.ViewHolder> {
 
     private List<TmdbMovie> mData = null;
     private LayoutInflater mInflater;
@@ -38,7 +38,7 @@ public class PicassoGridViewAdapter extends RecyclerView
     public void onBindViewHolder(ViewHolder holder, int position) {
         String posterPath = mData.get(position).posterPath;
         Picasso.with(mContext).load(NetworkUtils.buildImageUrl(posterPath))
-            .placeholder(R.color.colorPrimary).into(holder.imageView);
+                .placeholder(R.color.colorPrimary).into(holder.imageView);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class PicassoGridViewAdapter extends RecyclerView
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View
-        .OnClickListener {
+            .OnClickListener {
         public ImageView imageView;
 
         public ViewHolder(View itemView) {

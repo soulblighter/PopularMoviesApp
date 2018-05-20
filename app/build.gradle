@@ -1,45 +1,87 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion 27
+
     defaultConfig {
         applicationId "br.com.soulblighter.popularmoviesapp"
-        minSdkVersion 21
-        targetSdkVersion 26
-        versionCode 2
+        minSdkVersion 14
+        targetSdkVersion 27
+        versionCode 3
         versionName "1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+        vectorDrawables.useSupportLibrary true
 
         // Please ensure you have a valid API KEY for themoviedb.org to use this app
         // A valid key will need to be entered
         buildConfigField("String", "API_KEY", API_KEY)
+
+        // add below section
+        javaCompileOptions {
+            annotationProcessorOptions {
+                includeCompileClasspath true
+            }
+        }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            // Faster build of debug version (only for dev)
+            // https://hackernoon.com/how-to-speed-up-your-slow-gradle-builds-5d9a9545f91a
+            // Tip 7 — Avoid inadvertent changes
+            ext.alwaysUpdateBuildId = false
+            versionNameSuffix "dev"
+            splits.abi.enable false
+            splits.density.enable false
+            // Tip 5 — Disable PNG Crunching
+            aaptOptions.cruncherEnabled false
+            //only package english translations, and xxhdpi resources
+            //resConfigs ("en", "xxhdpi")
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "popularmoviesapp-${variant.versionName}.apk"
+        }
     }
 
     dataBinding.enabled = true
-
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
 
-    compile 'com.android.support:appcompat-v7:26.+'
-    compile 'com.android.support:recyclerview-v7:26.+'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.android.support:design:26.+'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
 
-    compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.google.code.gson:gson:2.8.0'
+    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'com.google.code.gson:gson:2.8.0'
 
-    testCompile 'junit:junit:4.12'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.8.0'
+
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.12'
+
+    testImplementation 'junit:junit:4.12'
 }

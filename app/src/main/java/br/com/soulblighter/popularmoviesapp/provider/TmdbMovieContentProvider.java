@@ -33,12 +33,12 @@ public class TmdbMovieContentProvider extends ContentProvider {
           single item by ID.
          */
         uriMatcher.addURI(TmdbMovieContract.AUTHORITY, TmdbMovieContract
-            .PATH_ARTICLES, URI_MATCH_ARTICLE);
+                .PATH_ARTICLES, URI_MATCH_ARTICLE);
         uriMatcher.addURI(TmdbMovieContract.AUTHORITY, TmdbMovieContract
-            .PATH_ARTICLES + "/" + TmdbMovieContract.Entry._ID + "/#",
-            URI_MATCH_ARTICLE_WITH_ID);
+                        .PATH_ARTICLES + "/" + TmdbMovieContract.Entry._ID + "/#",
+                URI_MATCH_ARTICLE_WITH_ID);
         uriMatcher.addURI(TmdbMovieContract.AUTHORITY, TmdbMovieContract
-            .PATH_ARTICLES + "/#", URI_MATCH_ARTICLE_WITH_MOVIE_ID);
+                .PATH_ARTICLES + "/#", URI_MATCH_ARTICLE_WITH_MOVIE_ID);
 
         return uriMatcher;
     }
@@ -70,13 +70,13 @@ public class TmdbMovieContentProvider extends ContentProvider {
                 // Insert new values into the database
                 // Inserting values into Articles table
                 long id = db.insert(TmdbMovieContract.Entry.TABLE_NAME, null,
-                    values);
+                        values);
                 if (id > 0) {
                     returnUri = ContentUris.withAppendedId(TmdbMovieContract
-                        .Entry.CONTENT_URI, id);
+                            .Entry.CONTENT_URI, id);
                 } else {
                     throw new android.database.SQLException("Failed to insert" +
-                        " row into " + uri);
+                            " row into " + uri);
                 }
                 break;
             // Set the value for the returnedUri and write the default case
@@ -107,7 +107,7 @@ public class TmdbMovieContentProvider extends ContentProvider {
                 try {
                     for (ContentValues value : values) {
                         long _id = db.insert(TmdbMovieContract.Entry
-                            .TABLE_NAME, null, value);
+                                .TABLE_NAME, null, value);
                         if (_id != -1) {
                             rowsInserted++;
                         }
@@ -130,7 +130,7 @@ public class TmdbMovieContentProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String s, @Nullable
-        String[] strings) {
+            String[] strings) {
 
         // Get access to the database and write URI matching code to
         // recognize a single item
@@ -150,7 +150,7 @@ public class TmdbMovieContentProvider extends ContentProvider {
                 String id = uri.getLastPathSegment();
                 // Use selections/selectionArgs to filter for this ID
                 tasksDeleted = db.delete(TmdbMovieContract.Entry.TABLE_NAME,
-                    TmdbMovieContract.Entry._ID + "=?", new String[]{id});
+                        TmdbMovieContract.Entry._ID + "=?", new String[]{id});
                 break;
 
             case URI_MATCH_ARTICLE_WITH_MOVIE_ID:
@@ -158,14 +158,14 @@ public class TmdbMovieContentProvider extends ContentProvider {
                 String movie_id = uri.getLastPathSegment();
                 // Use selections/selectionArgs to filter for this ID
                 tasksDeleted = db.delete(TmdbMovieContract.Entry.TABLE_NAME,
-                    TmdbMovieContract.Entry.MOVIE_ID + "=?", new
-                        String[]{movie_id});
+                        TmdbMovieContract.Entry.MOVIE_ID + "=?", new
+                                String[]{movie_id});
                 break;
 
             case URI_MATCH_ARTICLE:
                 // Delete all
                 tasksDeleted = db.delete(TmdbMovieContract.Entry.TABLE_NAME,
-                    null, null);
+                        null, null);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -185,7 +185,7 @@ public class TmdbMovieContentProvider extends ContentProvider {
     // Implement query to handle requests for data by URI
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String
-        selection, String[] selectionArgs, String sortOrder) {
+            selection, String[] selectionArgs, String sortOrder) {
 
         // Get access to underlying database (read-only for query)
         final SQLiteDatabase db = mDbHelper.getReadableDatabase();
@@ -200,8 +200,8 @@ public class TmdbMovieContentProvider extends ContentProvider {
             // Query for the Articles directory
             case URI_MATCH_ARTICLE:
                 retCursor = db.query(TmdbMovieContract.Entry.TABLE_NAME,
-                    projection, selection, selectionArgs, null, null,
-                    sortOrder);
+                        projection, selection, selectionArgs, null, null,
+                        sortOrder);
                 break;
 
             case URI_MATCH_ARTICLE_WITH_ID:
@@ -210,9 +210,9 @@ public class TmdbMovieContentProvider extends ContentProvider {
 
                 retCursor = db.query(
                         /* Table we are going to query */
-                    TmdbMovieContract.Entry.TABLE_NAME, projection,
-                    TmdbMovieContract.Entry._ID + " = ? ",
-                    selectionArguments, null, null, sortOrder);
+                        TmdbMovieContract.Entry.TABLE_NAME, projection,
+                        TmdbMovieContract.Entry._ID + " = ? ",
+                        selectionArguments, null, null, sortOrder);
                 break;
 
             case URI_MATCH_ARTICLE_WITH_MOVIE_ID:
@@ -221,9 +221,9 @@ public class TmdbMovieContentProvider extends ContentProvider {
 
                 retCursor = db.query(
                         /* Table we are going to query */
-                    TmdbMovieContract.Entry.TABLE_NAME, projection,
-                    TmdbMovieContract.Entry.MOVIE_ID + " = ? ",
-                    selectionArguments, null, null, sortOrder);
+                        TmdbMovieContract.Entry.TABLE_NAME, projection,
+                        TmdbMovieContract.Entry.MOVIE_ID + " = ? ",
+                        selectionArguments, null, null, sortOrder);
                 break;
 
             // Default exception
@@ -240,7 +240,7 @@ public class TmdbMovieContentProvider extends ContentProvider {
 
     @Override
     public int update(@NonNull Uri uri, ContentValues values, String
-        selection, String[] selectionArgs) {
+            selection, String[] selectionArgs) {
         // Get access to underlying database (read-only for query)
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
@@ -255,16 +255,16 @@ public class TmdbMovieContentProvider extends ContentProvider {
                 String movie_id = uri.getLastPathSegment();
                 // Use selections/selectionArgs to filter for this ID
                 tasksUpdated = db.update(TmdbMovieContract.Entry.TABLE_NAME,
-                    values, TmdbMovieContract.Entry.MOVIE_ID + "=?",
-                    new String[]{movie_id});
+                        values, TmdbMovieContract.Entry.MOVIE_ID + "=?",
+                        new String[]{movie_id});
                 break;
 
             case URI_MATCH_ARTICLE_WITH_ID:
                 String id = uri.getLastPathSegment();
                 // Use selections/selectionArgs to filter for this ID
                 tasksUpdated = db.update(TmdbMovieContract.Entry.TABLE_NAME,
-                    values, TmdbMovieContract.Entry._ID + "=?", new
-                        String[]{id});
+                        values, TmdbMovieContract.Entry._ID + "=?", new
+                                String[]{id});
                 break;
 
             // Default exception

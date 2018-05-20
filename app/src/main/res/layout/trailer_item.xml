@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="horizontal">
 
     <ImageView
         android:id="@+id/iv_play"
@@ -13,7 +13,7 @@
         android:layout_margin="4dp"
         android:layout_gravity="center"
         android:src="@mipmap/ic_play"
-        app:srcCompat="@mipmap/ic_play" />
+        app:srcCompat="@mipmap/ic_play"/>
 
     <TextView
         android:id="@+id/tv_trailer"
@@ -23,6 +23,6 @@
         android:padding="8dp"
         android:textAlignment="viewStart"
         android:textSize="22sp"
-        tools:text="TextView very long text example, with more than two lines" />
+        tools:text="TextView very long text example, with more than two lines"/>
 
 </LinearLayout>

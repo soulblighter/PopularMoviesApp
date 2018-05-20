@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
         Context appContext = InstrumentationRegistry.getTargetContext();
 
         assertEquals("br.com.soulblighter.popularmoviesapp", appContext
-            .getPackageName());
+                .getPackageName());
     }
 }

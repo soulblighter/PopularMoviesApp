@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
 
     <TextView
         android:id="@+id/tv_author"
@@ -15,7 +15,7 @@
         android:textAlignment="viewStart"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="16sp"
-        tools:text="author" />
+        tools:text="author"/>
 
     <TextView
         android:id="@+id/tv_review_text"
@@ -25,6 +25,6 @@
         android:padding="8dp"
         android:textAlignment="viewStart"
         android:textSize="14sp"
-        tools:text="review text" />
+        tools:text="review text"/>
 
 </LinearLayout>
