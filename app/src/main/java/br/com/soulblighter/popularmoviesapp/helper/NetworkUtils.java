@@ -1,15 +1,9 @@
-package br.com.soulblighter.popularmoviesapp.network;
+package br.com.soulblighter.popularmoviesapp.helper;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Scanner;
 
 import br.com.soulblighter.popularmoviesapp.BuildConfig;
 

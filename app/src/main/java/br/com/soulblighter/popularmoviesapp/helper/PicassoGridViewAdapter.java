@@ -1,4 +1,4 @@
-package br.com.soulblighter.popularmoviesapp;
+package br.com.soulblighter.popularmoviesapp.helper;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -11,8 +11,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import br.com.soulblighter.popularmoviesapp.R;
 import br.com.soulblighter.popularmoviesapp.json.TmdbMovie;
-import br.com.soulblighter.popularmoviesapp.network.NetworkUtils;
 
 public class PicassoGridViewAdapter extends RecyclerView
         .Adapter<PicassoGridViewAdapter.ViewHolder> {
