@@ -21,15 +21,16 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.inject.Inject;
+
 import br.com.soulblighter.popularmoviesapp.databinding.ActivityDetailBinding;
 import br.com.soulblighter.popularmoviesapp.json.TmdbMovie;
 import br.com.soulblighter.popularmoviesapp.json.TmdbReview;
 import br.com.soulblighter.popularmoviesapp.json.TmdbReviewResp;
 import br.com.soulblighter.popularmoviesapp.json.TmdbTrailer;
 import br.com.soulblighter.popularmoviesapp.json.TmdbTrailerResp;
-import br.com.soulblighter.popularmoviesapp.network.NetworkUtils;
+import br.com.soulblighter.popularmoviesapp.helper.NetworkUtils;
 import br.com.soulblighter.popularmoviesapp.provider.TmdbMovieContract;
-import br.com.soulblighter.popularmoviesapp.retrofit.TmdbRetrofitConfig;
 import br.com.soulblighter.popularmoviesapp.retrofit.TmdbService;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
@@ -47,7 +48,9 @@ public class DetailActivity extends AppCompatActivity {
 
     ActivityDetailBinding mBinding;
 
-    TmdbService mTmdbService;
+    @Inject
+    public TmdbService mTmdbService;
+
     private DisposableSingleObserver<TmdbReviewResp> mReviewsDisposable = null;
     private DisposableSingleObserver<TmdbTrailerResp> mTrailersDisposable = null;
 
@@ -57,6 +60,10 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+
+        ((PopularMoviesApp) getApplication())
+                .getMyComponent()
+                .inject(this);
 
         Intent i = getIntent();
         final TmdbMovie movie = i.getParcelableExtra(EXTRA_MOVIE);
@@ -126,8 +133,6 @@ public class DetailActivity extends AppCompatActivity {
 
         vi = (LayoutInflater) getApplicationContext()
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        mTmdbService = new TmdbRetrofitConfig().getTmdbService();
 
         mBinding.pbReview.setVisibility(View.VISIBLE);
 

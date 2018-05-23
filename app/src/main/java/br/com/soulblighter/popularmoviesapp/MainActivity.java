@@ -19,13 +19,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import javax.inject.Inject;
+
 import br.com.soulblighter.popularmoviesapp.databinding.ActivityMainBinding;
+import br.com.soulblighter.popularmoviesapp.helper.PicassoGridViewAdapter;
 import br.com.soulblighter.popularmoviesapp.json.TmdbMovie;
 import br.com.soulblighter.popularmoviesapp.json.TmdbMovieResp;
-import br.com.soulblighter.popularmoviesapp.network.NetworkUtils;
+import br.com.soulblighter.popularmoviesapp.helper.NetworkUtils;
 import br.com.soulblighter.popularmoviesapp.provider.TmdbMovieContract;
-import br.com.soulblighter.popularmoviesapp.retrofit.TmdbRetrofitConfig;
+import br.com.soulblighter.popularmoviesapp.retrofit.RetrofitComponent;
 import br.com.soulblighter.popularmoviesapp.retrofit.TmdbService;
+import dagger.android.AndroidInjection;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
@@ -70,7 +74,11 @@ public class MainActivity extends AppCompatActivity
     private StaggeredGridLayoutManager mLayoutManager;
     private Parcelable mGridState;
 
-    private TmdbService mTmdbService;
+    @Inject
+    public TmdbService mTmdbService;
+
+    private RetrofitComponent component;
+
     private DisposableSingleObserver<TmdbMovieResp> mFavoritesDisposable = null;
     private DisposableSingleObserver<TmdbMovieResp> mPopularDisposable = null;
     private DisposableSingleObserver<TmdbMovieResp> mTopRatedDisposable = null;
@@ -79,6 +87,9 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ((PopularMoviesApp) getApplication())
+                .getMyComponent()
+                .inject(this);
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
@@ -106,8 +117,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         mBinding.recyclerGridView.setAdapter(mAdapter);
-
-        mTmdbService = new TmdbRetrofitConfig().getTmdbService();
         loadData();
     }
 
