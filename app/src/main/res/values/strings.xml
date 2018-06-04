@@ -3,8 +3,8 @@
     <string name="menu_sort_popular">Sort by most popular</string>
     <string name="menu_sort_rate">Sort by top rated</string>
     <string name="menu_show_favorites">Show favorites</string>
-    <string name="release_date">Release date:</string>
-    <string name="rating">Average vote:</string>
+    <string name="release_date">Release date: %1$s</string>
+    <string name="rating">Average vote: %1$s/10.0</string>
     <string name="error_no_network">Cannot connect to TMDB without network connection!</string>
     <string name="error_parse_json">Error parsing data from TMDB (hint: check API key)</string>
     <string name="poster_descritor">Movie poster</string>

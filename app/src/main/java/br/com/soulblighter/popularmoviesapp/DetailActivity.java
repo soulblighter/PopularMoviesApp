@@ -1,5 +1,6 @@
 package br.com.soulblighter.popularmoviesapp;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -20,6 +21,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -33,6 +35,7 @@ import br.com.soulblighter.popularmoviesapp.helper.NetworkUtils;
 import br.com.soulblighter.popularmoviesapp.provider.TmdbMovieContract;
 import br.com.soulblighter.popularmoviesapp.retrofit.TmdbService;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -41,21 +44,21 @@ public class DetailActivity extends AppCompatActivity {
     public static final String EXTRA_MOVIE = "movie";
 
     // Screen rotation
-    boolean mTrailersLoaded = false;
-    boolean mReviewsLoaded = false;
-    private static final String EXTRA_SCROLL_POS = "SCROLL_POSITION";
-    private int[] mScrollPosition;
+    //boolean mTrailersLoaded = false;
+    //boolean mReviewsLoaded = false;
+    //private static final String EXTRA_SCROLL_POS = "SCROLL_POSITION";
+    //private int[] mScrollPosition;
 
     ActivityDetailBinding mBinding;
 
     @Inject
     public TmdbService mTmdbService;
 
-    private DisposableSingleObserver<TmdbReviewResp> mReviewsDisposable = null;
-    private DisposableSingleObserver<TmdbTrailerResp> mTrailersDisposable = null;
+    private final CompositeDisposable mDisposables = new CompositeDisposable();
 
     LayoutInflater vi;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,9 +74,7 @@ public class DetailActivity extends AppCompatActivity {
         mBinding = DataBindingUtil.setContentView(this, R.layout
                 .activity_detail);
 
-        mBinding.scrollview.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
+        mBinding.scrollview.setOnTouchListener((view, motionEvent) -> {
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     mBinding.fab.show();
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
@@ -81,22 +82,22 @@ public class DetailActivity extends AppCompatActivity {
                 }
                 return false;
             }
-        });
+        );
 
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
         try {
             Date date = df.parse(movie.releaseDate);
-            mBinding.tvDate.setText(this.getString(R.string.release_date) + "" +
-                    " " + String.valueOf(new SimpleDateFormat("dd/MM/yyyy")
-                    .format(date)));
+            mBinding.tvDate.setText(this.getString(R.string.release_date,
+                    String.valueOf(new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
+                    .format(date))));
         } catch (ParseException pe) {
             pe.printStackTrace();
-            mBinding.tvDate.setText(this.getString(R.string.release_date) + "" +
-                    " " + String.valueOf(movie.releaseDate));
+            mBinding.tvDate.setText(this.getString(R.string.release_date,
+                    String.valueOf(movie.releaseDate)));
         }
 
-        mBinding.tvRating.setText(this.getString(R.string.rating) + " " +
-                String.valueOf(movie.voteAverage) + " / 10.0");
+        mBinding.tvRating.setText(this.getString(R.string.rating,
+                String.valueOf(movie.voteAverage)));
         mBinding.tvSummary.setText(String.valueOf(movie.overview));
         mBinding.tvName.setText(String.valueOf(movie.title));
 
@@ -108,26 +109,23 @@ public class DetailActivity extends AppCompatActivity {
         } else {
             mBinding.fab.setImageResource(android.R.drawable.btn_star_big_off);
         }
-        mBinding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (TmdbMovieContract.isFavorite(DetailActivity.this, movie)) {
-                    TmdbMovieContract.unmarkAsFavorite(DetailActivity.this,
-                            movie);
-                    mBinding.fab.setImageResource(android.R.drawable.btn_star_big_off);
-                    Snackbar.make(mBinding.scrollview,
-                            String.format(getString(R.string.unmark_as_favorite),
-                                    movie.title),
-                            Snackbar.LENGTH_SHORT).show();
-                } else {
-                    TmdbMovieContract.markAsFavorite(DetailActivity.this,
-                            movie);
-                    mBinding.fab.setImageResource(android.R.drawable.btn_star_big_on);
-                    Snackbar.make(mBinding.scrollview,
-                            String.format(getString(R.string.mark_as_favorite),
-                                    movie.title),
-                            Snackbar.LENGTH_SHORT).show();
-                }
+        mBinding.fab.setOnClickListener(view -> {
+            if (TmdbMovieContract.isFavorite(DetailActivity.this, movie)) {
+                TmdbMovieContract.unmarkAsFavorite(DetailActivity.this,
+                        movie);
+                mBinding.fab.setImageResource(android.R.drawable.btn_star_big_off);
+                Snackbar.make(mBinding.scrollview,
+                        String.format(getString(R.string.unmark_as_favorite),
+                                movie.title),
+                        Snackbar.LENGTH_SHORT).show();
+            } else {
+                TmdbMovieContract.markAsFavorite(DetailActivity.this,
+                        movie);
+                mBinding.fab.setImageResource(android.R.drawable.btn_star_big_on);
+                Snackbar.make(mBinding.scrollview,
+                        String.format(getString(R.string.mark_as_favorite),
+                                movie.title),
+                        Snackbar.LENGTH_SHORT).show();
             }
         });
 
@@ -136,36 +134,30 @@ public class DetailActivity extends AppCompatActivity {
 
         mBinding.pbReview.setVisibility(View.VISIBLE);
 
-        if(mReviewsDisposable != null && !mReviewsDisposable.isDisposed()) {
-            mReviewsDisposable.dispose();
-        }
-        mReviewsDisposable = getReviewObserver();
+        DisposableSingleObserver<TmdbReviewResp> reviewsDisposable = getReviewObserver();
         mTmdbService.getReviews(String.valueOf(movie.id), BuildConfig.API_KEY)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(mReviewsDisposable);
+                .subscribe(reviewsDisposable);
+        mDisposables.add(reviewsDisposable);
 
         mBinding.pbTrailers.setVisibility(View.VISIBLE);
 
-        if(mTrailersDisposable != null && !mTrailersDisposable.isDisposed()) {
-            mTrailersDisposable.dispose();
-        }
-        mTrailersDisposable = getTrailersObserver();
+        DisposableSingleObserver<TmdbTrailerResp>
+        trailersDisposable = getTrailersObserver();
         mTmdbService.getTrailers(String.valueOf(movie.id), BuildConfig.API_KEY)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(mTrailersDisposable);
+                .subscribe(trailersDisposable);
+        mDisposables.add(trailersDisposable);
     }
 
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mTrailersDisposable != null && !mTrailersDisposable.isDisposed()) {
-            mTrailersDisposable.dispose();
-        }
-        if(mReviewsDisposable != null && !mReviewsDisposable.isDisposed()) {
-            mReviewsDisposable.dispose();
+        if(mDisposables != null && !mDisposables.isDisposed()) {
+            mDisposables.dispose();
         }
     }
 
@@ -185,16 +177,12 @@ public class DetailActivity extends AppCompatActivity {
                                 .tv_trailer);
                         tv_trailer.setText(trailer.name);
 
-                        v.setOnClickListener(new View.OnClickListener
-                                () {
-                            @Override
-                            public void onClick(View view) {
-                                Intent intent = new Intent(Intent
-                                        .ACTION_VIEW, Uri.parse
-                                        (NetworkUtils.buildYoutubeUrl
-                                                (trailer.key)));
-                                startActivity(intent);
-                            }
+                        v.setOnClickListener(view -> {
+                            Intent intent = new Intent(Intent
+                                    .ACTION_VIEW, Uri.parse
+                                    (NetworkUtils.buildYoutubeUrl
+                                            (trailer.key)));
+                            startActivity(intent);
                         });
 
                         mBinding.layoutTrailerList.addView(v);
@@ -241,7 +229,7 @@ public class DetailActivity extends AppCompatActivity {
             }
         };
     }
-
+/*
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -255,7 +243,7 @@ public class DetailActivity extends AppCompatActivity {
         super.onRestoreInstanceState(savedInstanceState);
         mScrollPosition = savedInstanceState.getIntArray(EXTRA_SCROLL_POS);
     }
-
+*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {

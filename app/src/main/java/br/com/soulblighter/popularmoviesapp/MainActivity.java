@@ -32,6 +32,7 @@ import br.com.soulblighter.popularmoviesapp.retrofit.TmdbService;
 import dagger.android.AndroidInjection;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -71,17 +72,12 @@ public class MainActivity extends AppCompatActivity
 
     private ActivityMainBinding mBinding;
     private PicassoGridViewAdapter mAdapter;
-    private StaggeredGridLayoutManager mLayoutManager;
     private Parcelable mGridState;
 
     @Inject
     public TmdbService mTmdbService;
 
-    private RetrofitComponent component;
-
-    private DisposableSingleObserver<TmdbMovieResp> mFavoritesDisposable = null;
-    private DisposableSingleObserver<TmdbMovieResp> mPopularDisposable = null;
-    private DisposableSingleObserver<TmdbMovieResp> mTopRatedDisposable = null;
+    private final CompositeDisposable mDisposables = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +100,7 @@ public class MainActivity extends AppCompatActivity
 
         int display_mode = getResources().getConfiguration().orientation;
 
+        StaggeredGridLayoutManager mLayoutManager;
         if (display_mode == Configuration.ORIENTATION_PORTRAIT) {
             mLayoutManager = new
                     StaggeredGridLayoutManager(2, StaggeredGridLayoutManager
@@ -123,14 +120,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mFavoritesDisposable != null && !mFavoritesDisposable.isDisposed()) {
-            mFavoritesDisposable.dispose();
-        }
-        if(mPopularDisposable != null && !mPopularDisposable.isDisposed()) {
-            mPopularDisposable.dispose();
-        }
-        if(mTopRatedDisposable != null && !mTopRatedDisposable.isDisposed()) {
-            mTopRatedDisposable.dispose();
+        if(mDisposables != null && !mDisposables.isDisposed()) {
+            mDisposables.dispose();
         }
     }
 
@@ -231,14 +222,13 @@ public class MainActivity extends AppCompatActivity
                     return;
                 }
 
-                if(mTopRatedDisposable != null && !mTopRatedDisposable.isDisposed()) {
-                    mTopRatedDisposable.dispose();
-                }
-                mTopRatedDisposable = getMovieObserver();
+                DisposableSingleObserver<TmdbMovieResp> mTopRatedDisposable =
+                        getMovieObserver();
                 mTmdbService.getMovie(TmdbService.TOP_RATED_PATH, BuildConfig.API_KEY)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(getMovieObserver());
+                mDisposables.add(mTopRatedDisposable);
                 break;
 
             case SORT_POPULAR:
@@ -247,22 +237,19 @@ public class MainActivity extends AppCompatActivity
                     return;
                 }
 
-                if(mPopularDisposable != null && !mPopularDisposable.isDisposed()) {
-                    mPopularDisposable.dispose();
-                }
-                mPopularDisposable = getMovieObserver();
+                DisposableSingleObserver<TmdbMovieResp> mPopularDisposable =
+                        getMovieObserver();
                 mTmdbService.getMovie(TmdbService.POPULAR_PATH, BuildConfig.API_KEY)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(mPopularDisposable);
+                mDisposables.add(mPopularDisposable);
                 break;
 
             case LOCAL_FAVORITES:
 
-                if(mFavoritesDisposable != null && !mFavoritesDisposable.isDisposed()) {
-                    mFavoritesDisposable.dispose();
-                }
-                mFavoritesDisposable = getMovieObserver();
+                DisposableSingleObserver<TmdbMovieResp> mFavoritesDisposable =
+                        getMovieObserver();
                 Single.fromCallable(() -> {
                     // URI for all rows of weather data in our weather table
                     Uri queryUri = TmdbMovieContract.Entry.CONTENT_URI;
@@ -304,6 +291,7 @@ public class MainActivity extends AppCompatActivity
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(mFavoritesDisposable);
+                mDisposables.add(mFavoritesDisposable);
         }
     }
 
