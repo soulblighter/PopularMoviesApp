@@ -1,10 +1,10 @@
-package br.com.soulblighter.popularmoviesapp;
+package br.com.soulblighter.popularmoviesapp.main;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.databinding.DataBindingUtil;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
@@ -13,30 +13,25 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import javax.inject.Inject;
 
+import br.com.soulblighter.popularmoviesapp.BuildConfig;
+import br.com.soulblighter.popularmoviesapp.PopularMoviesApp;
+import br.com.soulblighter.popularmoviesapp.R;
+import br.com.soulblighter.popularmoviesapp.data.TmdbMovie;
+import br.com.soulblighter.popularmoviesapp.data.TmdbMovieResp;
 import br.com.soulblighter.popularmoviesapp.databinding.ActivityMainBinding;
-import br.com.soulblighter.popularmoviesapp.helper.PicassoGridViewAdapter;
-import br.com.soulblighter.popularmoviesapp.json.TmdbMovie;
-import br.com.soulblighter.popularmoviesapp.json.TmdbMovieResp;
+import br.com.soulblighter.popularmoviesapp.detail.DetailActivity;
 import br.com.soulblighter.popularmoviesapp.helper.NetworkUtils;
-import br.com.soulblighter.popularmoviesapp.provider.TmdbMovieContract;
-import br.com.soulblighter.popularmoviesapp.retrofit.RetrofitComponent;
 import br.com.soulblighter.popularmoviesapp.retrofit.TmdbService;
-import dagger.android.AndroidInjection;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
-import static br.com.soulblighter.popularmoviesapp.MainActivity.ErrorType.NO_CONNECTION;
+import static br.com.soulblighter.popularmoviesapp.main.MainActivity.ErrorType.NO_CONNECTION;
 
 public class MainActivity extends AppCompatActivity
         implements PicassoGridViewAdapter.PicassoClickListener {
@@ -48,22 +43,6 @@ public class MainActivity extends AppCompatActivity
     public enum ErrorType {
         NO_CONNECTION, PARSE_JSON
     }
-
-    public static final String[] MAIN_TMDB_PROJECTION = {
-            TmdbMovieContract.Entry.MOVIE_ID,
-            TmdbMovieContract.Entry.TITLE,
-            TmdbMovieContract.Entry.POSTER_PATH,
-            TmdbMovieContract.Entry.RELEASE_DATE,
-            TmdbMovieContract.Entry.VOTE_AVERAGE,
-            TmdbMovieContract.Entry.OVERVIEW
-    };
-
-    public static final int INDEX_TMDB_MOVIE_ID = 0;
-    public static final int INDEX_TMDB_TITLE = 1;
-    public static final int INDEX_TMDB_POSTER_PATH = 2;
-    public static final int INDEX_TMDB_RELEASE_DATE = 3;
-    public static final int INDEX_TMDB_VOTE_AVERAGE = 4;
-    public static final int INDEX_TMDB_OVERVIEW = 5;
 
     private TmdbDisplayType mTmdbDisplayTypeSelected = TmdbDisplayType
             .SORT_POPULAR;
@@ -77,6 +56,9 @@ public class MainActivity extends AppCompatActivity
     @Inject
     public TmdbService mTmdbService;
 
+    private TmdbViewModel mTmdbViewModel;
+    Observer<List<TmdbMovie>> mLiveDataObserver;
+
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
     @Override
@@ -86,6 +68,9 @@ public class MainActivity extends AppCompatActivity
         ((PopularMoviesApp) getApplication())
                 .getMyComponent()
                 .inject(this);
+
+        mTmdbViewModel = ViewModelProviders.of(this).get(TmdbViewModel.class);
+        mLiveDataObserver = getLiveDataObserver();
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
@@ -120,7 +105,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mDisposables != null && !mDisposables.isDisposed()) {
+        if(!mDisposables.isDisposed()) {
             mDisposables.dispose();
         }
     }
@@ -215,6 +200,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void loadData() {
+
+        if( mTmdbViewModel.getAllMovies().hasObservers() ) {
+            mTmdbViewModel.getAllMovies().removeObservers(this);
+            //mTmdbViewModel.getAllMovies().removeObserver(mLiveDataObserver);
+        }
+
         switch (mTmdbDisplayTypeSelected) {
             case SORT_RATING:
                 if (!NetworkUtils.isOnline(this)) {
@@ -247,51 +238,7 @@ public class MainActivity extends AppCompatActivity
                 break;
 
             case LOCAL_FAVORITES:
-
-                DisposableSingleObserver<TmdbMovieResp> mFavoritesDisposable =
-                        getMovieObserver();
-                Single.fromCallable(() -> {
-                    // URI for all rows of weather data in our weather table
-                    Uri queryUri = TmdbMovieContract.Entry.CONTENT_URI;
-                    // Sort order: Ascending by date
-                    String sortOrder = TmdbMovieContract.Entry.MOVIE_ID +
-                            " DESC";
-
-                    Cursor cursor = getContentResolver().query( queryUri,
-                            MAIN_TMDB_PROJECTION,
-                            null,
-                            null,
-                            sortOrder);
-
-                    TmdbMovieResp tmdbMovieResp = new TmdbMovieResp();
-                    List<TmdbMovie> movies = null;
-                    if (cursor != null) {
-                        movies = new ArrayList<>();
-                        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor
-                                .moveToNext()) {
-                            TmdbMovie movie = new TmdbMovie();
-                            movie.id = cursor.getInt(INDEX_TMDB_MOVIE_ID);
-                            movie.title = cursor.getString(INDEX_TMDB_TITLE);
-                            movie.posterPath = cursor.getString
-                                    (INDEX_TMDB_POSTER_PATH);
-                            Date date = new Date(cursor.getLong
-                                    (INDEX_TMDB_RELEASE_DATE));
-                            SimpleDateFormat sdf = new SimpleDateFormat
-                                    ("yyyy-MM-dd", Locale.ENGLISH);
-                            movie.releaseDate = sdf.format(date);
-                            movie.voteAverage = cursor.getDouble
-                                    (INDEX_TMDB_VOTE_AVERAGE);
-                            movie.overview = cursor.getString(INDEX_TMDB_OVERVIEW);
-                            movies.add(movie);
-                        }
-                        tmdbMovieResp.results = movies;
-                    }
-                    return tmdbMovieResp;
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(mFavoritesDisposable);
-                mDisposables.add(mFavoritesDisposable);
+                mTmdbViewModel.getAllMovies().observe(this, mLiveDataObserver);
         }
     }
 
@@ -309,6 +256,11 @@ public class MainActivity extends AppCompatActivity
                 showError(e.getLocalizedMessage());
             }
         };
+    }
+
+    Observer<List<TmdbMovie>> getLiveDataObserver() {
+        // Update the cached copy of the words in the adapter.
+        return this::updateData;
     }
 
 }

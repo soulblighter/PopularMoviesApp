@@ -1,4 +1,4 @@
-package br.com.soulblighter.popularmoviesapp.json;
+package br.com.soulblighter.popularmoviesapp.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;

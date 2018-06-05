@@ -15,7 +15,7 @@ public class PopularMoviesApp extends Application {
         mMyComponent = createMyComponent();
     }
 
-    RetrofitComponent getMyComponent() {
+    public RetrofitComponent getMyComponent() {
         return mMyComponent;
     }
 

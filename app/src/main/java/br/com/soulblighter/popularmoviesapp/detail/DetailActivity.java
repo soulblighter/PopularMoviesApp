@@ -1,6 +1,7 @@
-package br.com.soulblighter.popularmoviesapp;
+package br.com.soulblighter.popularmoviesapp.detail;
 
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -25,14 +26,17 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
+import br.com.soulblighter.popularmoviesapp.BuildConfig;
+import br.com.soulblighter.popularmoviesapp.PopularMoviesApp;
+import br.com.soulblighter.popularmoviesapp.R;
+import br.com.soulblighter.popularmoviesapp.data.TmdbMovie;
+import br.com.soulblighter.popularmoviesapp.data.TmdbReview;
+import br.com.soulblighter.popularmoviesapp.data.TmdbReviewResp;
+import br.com.soulblighter.popularmoviesapp.data.TmdbTrailer;
+import br.com.soulblighter.popularmoviesapp.data.TmdbTrailerResp;
 import br.com.soulblighter.popularmoviesapp.databinding.ActivityDetailBinding;
-import br.com.soulblighter.popularmoviesapp.json.TmdbMovie;
-import br.com.soulblighter.popularmoviesapp.json.TmdbReview;
-import br.com.soulblighter.popularmoviesapp.json.TmdbReviewResp;
-import br.com.soulblighter.popularmoviesapp.json.TmdbTrailer;
-import br.com.soulblighter.popularmoviesapp.json.TmdbTrailerResp;
 import br.com.soulblighter.popularmoviesapp.helper.NetworkUtils;
-import br.com.soulblighter.popularmoviesapp.provider.TmdbMovieContract;
+import br.com.soulblighter.popularmoviesapp.main.TmdbViewModel;
 import br.com.soulblighter.popularmoviesapp.retrofit.TmdbService;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -54,6 +58,8 @@ public class DetailActivity extends AppCompatActivity {
     @Inject
     public TmdbService mTmdbService;
 
+    private TmdbViewModel mTmdbViewModel;
+
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
     LayoutInflater vi;
@@ -70,6 +76,9 @@ public class DetailActivity extends AppCompatActivity {
 
         Intent i = getIntent();
         final TmdbMovie movie = i.getParcelableExtra(EXTRA_MOVIE);
+
+
+        mTmdbViewModel = ViewModelProviders.of(this).get(TmdbViewModel.class);
 
         mBinding = DataBindingUtil.setContentView(this, R.layout
                 .activity_detail);
@@ -102,32 +111,40 @@ public class DetailActivity extends AppCompatActivity {
         mBinding.tvName.setText(String.valueOf(movie.title));
 
         Picasso.with(this).load(NetworkUtils.buildImageUrl(movie.posterPath))
-                .placeholder(R.color.colorPrimary).into(mBinding.ivPoster);
+            .placeholder(R.color.colorPrimary).into(mBinding.ivPoster);
 
-        if (TmdbMovieContract.isFavorite(this, movie)) {
-            mBinding.fab.setImageResource(android.R.drawable.btn_star_big_on);
-        } else {
-            mBinding.fab.setImageResource(android.R.drawable.btn_star_big_off);
-        }
+        mDisposables.add(mTmdbViewModel.isFavorite(movie.id)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                isFavorite -> mBinding.fab.setImageResource(android.R.drawable.btn_star_big_on),
+                Throwable::printStackTrace,
+                () -> mBinding.fab.setImageResource(android.R.drawable.btn_star_big_off)));
+
         mBinding.fab.setOnClickListener(view -> {
-            if (TmdbMovieContract.isFavorite(DetailActivity.this, movie)) {
-                TmdbMovieContract.unmarkAsFavorite(DetailActivity.this,
-                        movie);
-                mBinding.fab.setImageResource(android.R.drawable.btn_star_big_off);
-                Snackbar.make(mBinding.scrollview,
-                        String.format(getString(R.string.unmark_as_favorite),
-                                movie.title),
-                        Snackbar.LENGTH_SHORT).show();
-            } else {
-                TmdbMovieContract.markAsFavorite(DetailActivity.this,
-                        movie);
-                mBinding.fab.setImageResource(android.R.drawable.btn_star_big_on);
-                Snackbar.make(mBinding.scrollview,
-                        String.format(getString(R.string.mark_as_favorite),
-                                movie.title),
-                        Snackbar.LENGTH_SHORT).show();
-            }
-        });
+
+            mDisposables.add(mTmdbViewModel.isFavorite(movie.id)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(isFavorite -> {
+                        mTmdbViewModel.unmarkAsFavorite(movie);
+                        mBinding.fab.setImageResource(android.R.drawable
+                            .btn_star_big_off);
+                        Snackbar.make(mBinding.scrollview,
+                            String.format(getString(R.string.unmark_as_favorite), movie.title),
+                            Snackbar.LENGTH_SHORT).show();
+                    },
+
+                    Throwable::printStackTrace,
+
+                    () -> {
+                        mTmdbViewModel.markAsFavorite(movie);
+                        mBinding.fab.setImageResource(android.R.drawable.btn_star_big_on);
+                        Snackbar.make(mBinding.scrollview,
+                            String.format(getString(R.string.mark_as_favorite), movie.title),
+                            Snackbar.LENGTH_SHORT).show();
+                    }));
+            });
 
         vi = (LayoutInflater) getApplicationContext()
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -156,7 +173,7 @@ public class DetailActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mDisposables != null && !mDisposables.isDisposed()) {
+        if(!mDisposables.isDisposed()) {
             mDisposables.dispose();
         }
     }
@@ -209,7 +226,6 @@ public class DetailActivity extends AppCompatActivity {
                     mBinding.layoutReviewList.setVisibility(View.GONE);
                 }
                 for (TmdbReview review : reviews.results) {
-
                     View v = vi.inflate(R.layout.review_item, null);
                     TextView tv_author = v.findViewById(R.id.tv_author);
                     tv_author.setText(review.author);

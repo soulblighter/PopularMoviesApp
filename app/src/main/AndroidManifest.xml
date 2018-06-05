@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme"
         android:fullBackupContent="@xml/backup_descriptor">
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -23,17 +23,13 @@
         </activity>
 
         <activity
-            android:name=".DetailActivity"
-            android:parentActivityName=".MainActivity">
+            android:name=".detail.DetailActivity"
+            android:parentActivityName=".main.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value=".main.MainActivity"/>
         </activity>
 
-        <provider
-            android:authorities="br.com.soulblighter.popularmoviesapp"
-            android:name=".provider.TmdbMovieContentProvider"
-            android:exported="false"/>
     </application>
 
 </manifest>

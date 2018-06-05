@@ -1,62 +1,84 @@
-package br.com.soulblighter.popularmoviesapp.json;
+package br.com.soulblighter.popularmoviesapp.data;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
-import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
+@Entity(tableName = "movie")
 public class TmdbMovie implements Serializable, Parcelable {
 
-    @SerializedName("vote_count")
-    @Expose
-    public int voteCount;
+    @PrimaryKey
+    @NonNull
+    @ColumnInfo(name = "id")
     @SerializedName("id")
-    @Expose
     public int id;
+
+    @ColumnInfo(name = "voteCount")
+    @SerializedName("vote_count")
+    public int voteCount;
+
+    @ColumnInfo(name = "video")
     @SerializedName("video")
-    @Expose
     public boolean video;
+
+    @ColumnInfo(name = "voteAverage")
     @SerializedName("vote_average")
-    @Expose
     public double voteAverage;
+
+    @ColumnInfo(name = "title")
     @SerializedName("title")
-    @Expose
     public String title;
+
+    @ColumnInfo(name = "popularity")
     @SerializedName("popularity")
-    @Expose
     public double popularity;
+
+    @ColumnInfo(name = "posterPath")
     @SerializedName("poster_path")
-    @Expose
     public String posterPath;
+
+    @ColumnInfo(name = "originalLanguage")
     @SerializedName("original_language")
-    @Expose
     public String originalLanguage;
+
+    @ColumnInfo(name = "originalTitle")
     @SerializedName("original_title")
-    @Expose
     public String originalTitle;
+
+    @ColumnInfo(name = "genreIds")
     @SerializedName("genre_ids")
-    @Expose
-    public List<Integer> genreIds = new ArrayList<Integer>();
+    public ArrayList<Integer> genreIds = new ArrayList<Integer>();
+
+    @ColumnInfo(name = "backdropPath")
     @SerializedName("backdrop_path")
-    @Expose
     public String backdropPath;
+
+    @ColumnInfo(name = "adult")
     @SerializedName("adult")
-    @Expose
     public boolean adult;
+
+    @ColumnInfo(name = "overview")
     @SerializedName("overview")
-    @Expose
     public String overview;
+
+    @ColumnInfo(name = "releaseDate")
     @SerializedName("release_date")
-    @Expose
     public String releaseDate;
+
+    private final static long serialVersionUID = 1417041051496921076L;
+
+    public TmdbMovie() {
+    }
+
     public final static Parcelable.Creator<TmdbMovie> CREATOR = new Creator<TmdbMovie>() {
-
-
         @SuppressWarnings({
                 "unchecked"
         })
@@ -67,9 +89,7 @@ public class TmdbMovie implements Serializable, Parcelable {
         public TmdbMovie[] newArray(int size) {
             return (new TmdbMovie[size]);
         }
-
     };
-    private final static long serialVersionUID = 1417041051496921076L;
 
     protected TmdbMovie(Parcel in) {
         this.voteCount = ((int) in.readValue((int.class.getClassLoader())));
@@ -86,79 +106,6 @@ public class TmdbMovie implements Serializable, Parcelable {
         this.adult = ((boolean) in.readValue((boolean.class.getClassLoader())));
         this.overview = ((String) in.readValue((String.class.getClassLoader())));
         this.releaseDate = ((String) in.readValue((String.class.getClassLoader())));
-    }
-
-    public TmdbMovie() {
-    }
-
-    public TmdbMovie withVoteCount(int voteCount) {
-        this.voteCount = voteCount;
-        return this;
-    }
-
-    public TmdbMovie withId(int id) {
-        this.id = id;
-        return this;
-    }
-
-    public TmdbMovie withVideo(boolean video) {
-        this.video = video;
-        return this;
-    }
-
-    public TmdbMovie withVoteAverage(double voteAverage) {
-        this.voteAverage = voteAverage;
-        return this;
-    }
-
-    public TmdbMovie withTitle(String title) {
-        this.title = title;
-        return this;
-    }
-
-    public TmdbMovie withPopularity(double popularity) {
-        this.popularity = popularity;
-        return this;
-    }
-
-    public TmdbMovie withPosterPath(String posterPath) {
-        this.posterPath = posterPath;
-        return this;
-    }
-
-    public TmdbMovie withOriginalLanguage(String originalLanguage) {
-        this.originalLanguage = originalLanguage;
-        return this;
-    }
-
-    public TmdbMovie withOriginalTitle(String originalTitle) {
-        this.originalTitle = originalTitle;
-        return this;
-    }
-
-    public TmdbMovie withGenreIds(List<Integer> genreIds) {
-        this.genreIds = genreIds;
-        return this;
-    }
-
-    public TmdbMovie withBackdropPath(String backdropPath) {
-        this.backdropPath = backdropPath;
-        return this;
-    }
-
-    public TmdbMovie withAdult(boolean adult) {
-        this.adult = adult;
-        return this;
-    }
-
-    public TmdbMovie withOverview(String overview) {
-        this.overview = overview;
-        return this;
-    }
-
-    public TmdbMovie withReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
-        return this;
     }
 
     public void writeToParcel(Parcel dest, int flags) {
