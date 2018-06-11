@@ -1,4 +1,4 @@
-package br.com.soulblighter.popularmoviesapp.data;
+package br.com.soulblighter.popularmoviesapp.room;
 
 import android.arch.persistence.room.TypeConverter;
 
@@ -8,7 +8,11 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-public class Converters {
+public class RoomConverters {
+
+    // Instead of creating a new table to store this data array,
+    // we convert the String array to a JSON String using GSON
+    // and store it as a simple String
     @TypeConverter
     public static ArrayList<Integer> fromString(String value) {
         Type listType = new TypeToken<ArrayList<String>>() {}.getType();
@@ -17,7 +21,6 @@ public class Converters {
 
     @TypeConverter
     public static String fromArrayList(ArrayList<Integer> list) {
-        Gson gson = new Gson();
-        return gson.toJson(list);
+        return new Gson().toJson(list);
     }
 }

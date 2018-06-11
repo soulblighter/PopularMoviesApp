@@ -1,4 +1,4 @@
-package br.com.soulblighter.popularmoviesapp.main;
+package br.com.soulblighter.popularmoviesapp.ui.main;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
@@ -6,23 +6,24 @@ import android.arch.lifecycle.LiveData;
 
 import java.util.List;
 
-import br.com.soulblighter.popularmoviesapp.data.TmdbMovie;
-import br.com.soulblighter.popularmoviesapp.data.TmdbRepository;
+import br.com.soulblighter.popularmoviesapp.model.TmdbMovie;
+import br.com.soulblighter.popularmoviesapp.room.TmdbRepository;
 import io.reactivex.Maybe;
+import io.reactivex.Single;
 
-public class TmdbViewModel extends AndroidViewModel {
+public class MainViewModel extends AndroidViewModel {
 
     private TmdbRepository mRepository;
 
-    private LiveData<List<TmdbMovie>> mAllWords;
+    private Maybe<List<TmdbMovie>> mAllWords;
 
-    public TmdbViewModel(Application application) {
+    public MainViewModel(Application application) {
         super(application);
         mRepository = new TmdbRepository(application);
         mAllWords = mRepository.getAllMovies();
     }
 
-    LiveData<List<TmdbMovie>> getAllMovies() { return mAllWords; }
+    Maybe<List<TmdbMovie>> getAllMovies() { return mAllWords; }
 
     public Maybe<TmdbMovie> isFavorite(long id) {
         return mRepository.getMovie(id);

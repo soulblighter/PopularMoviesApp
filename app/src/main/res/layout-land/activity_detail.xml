@@ -113,7 +113,9 @@
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="4dp"
                         android:layout_marginTop="4dp"
-                        android:background="@color/colorPrimaryDark"/>
+                        android:background="@color/colorPrimaryDark"
+                        android:layout_marginRight="8dp"
+                        android:layout_marginLeft="4dp"/>
 
                     <TextView
                         android:id="@+id/tv_trailers_label"
@@ -151,7 +153,9 @@
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="4dp"
                         android:layout_marginTop="4dp"
-                        android:background="@color/colorPrimaryDark"/>
+                        android:background="@color/colorPrimaryDark"
+                        android:layout_marginRight="8dp"
+                        android:layout_marginLeft="4dp"/>
 
                     <TextView
                         android:id="@+id/tv_reviews_label"

@@ -2,27 +2,32 @@ package br.com.soulblighter.popularmoviesapp;
 
 import android.app.Application;
 
-import br.com.soulblighter.popularmoviesapp.retrofit.DaggerRetrofitComponent;
-import br.com.soulblighter.popularmoviesapp.retrofit.RetrofitComponent;
-import br.com.soulblighter.popularmoviesapp.retrofit.RetrofitModule;
+import br.com.soulblighter.popularmoviesapp.dagger2.AppModule;
+import br.com.soulblighter.popularmoviesapp.dagger2.DaggerNetComponent;
+import br.com.soulblighter.popularmoviesapp.dagger2.NetComponent;
+import br.com.soulblighter.popularmoviesapp.dagger2.NetModule;
 
 public class PopularMoviesApp extends Application {
-    private RetrofitComponent mMyComponent;
+
+    private NetComponent mNetComponent;
+
+    public static final String BASE_URL = "http://api.themoviedb.org/3/";
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mMyComponent = createMyComponent();
+        mNetComponent = createRetrofitComponent();
     }
 
-    public RetrofitComponent getMyComponent() {
-        return mMyComponent;
+    public NetComponent getDaggerRetrofitComponent() {
+        return mNetComponent;
     }
 
-    private RetrofitComponent createMyComponent() {
-        return DaggerRetrofitComponent
+    private NetComponent createRetrofitComponent() {
+        return DaggerNetComponent
                 .builder()
-                .retrofitModule(new RetrofitModule())
+                .appModule(new AppModule(this))
+                .netModule(new NetModule(BASE_URL))
                 .build();
     }
 }

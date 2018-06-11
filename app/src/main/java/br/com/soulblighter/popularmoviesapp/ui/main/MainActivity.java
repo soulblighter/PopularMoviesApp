@@ -1,4 +1,4 @@
-package br.com.soulblighter.popularmoviesapp.main;
+package br.com.soulblighter.popularmoviesapp.ui.main;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
@@ -20,10 +20,10 @@ import javax.inject.Inject;
 import br.com.soulblighter.popularmoviesapp.BuildConfig;
 import br.com.soulblighter.popularmoviesapp.PopularMoviesApp;
 import br.com.soulblighter.popularmoviesapp.R;
-import br.com.soulblighter.popularmoviesapp.data.TmdbMovie;
-import br.com.soulblighter.popularmoviesapp.data.TmdbMovieResp;
+import br.com.soulblighter.popularmoviesapp.model.TmdbMovie;
+import br.com.soulblighter.popularmoviesapp.retrofit.rest.TmdbMovieResp;
 import br.com.soulblighter.popularmoviesapp.databinding.ActivityMainBinding;
-import br.com.soulblighter.popularmoviesapp.detail.DetailActivity;
+import br.com.soulblighter.popularmoviesapp.ui.detail.DetailActivity;
 import br.com.soulblighter.popularmoviesapp.helper.NetworkUtils;
 import br.com.soulblighter.popularmoviesapp.retrofit.TmdbService;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -31,7 +31,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
-import static br.com.soulblighter.popularmoviesapp.main.MainActivity.ErrorType.NO_CONNECTION;
+import static br.com.soulblighter.popularmoviesapp.ui.main.MainActivity.ErrorType.NO_CONNECTION;
 
 public class MainActivity extends AppCompatActivity
         implements PicassoGridViewAdapter.PicassoClickListener {
@@ -44,8 +44,7 @@ public class MainActivity extends AppCompatActivity
         NO_CONNECTION, PARSE_JSON
     }
 
-    private TmdbDisplayType mTmdbDisplayTypeSelected = TmdbDisplayType
-            .SORT_POPULAR;
+    private TmdbDisplayType mTmdbDisplayTypeSelected = TmdbDisplayType.SORT_POPULAR;
     private static final String EXTRA_DISPLAY_TYPE = "display_type";
     private static final String EXTRA_GRID_SATE = "gridstate";
 
@@ -56,7 +55,7 @@ public class MainActivity extends AppCompatActivity
     @Inject
     public TmdbService mTmdbService;
 
-    private TmdbViewModel mTmdbViewModel;
+    private MainViewModel mMainViewModel;
     Observer<List<TmdbMovie>> mLiveDataObserver;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
@@ -64,15 +63,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         ((PopularMoviesApp) getApplication())
-                .getMyComponent()
+                .getDaggerRetrofitComponent()
                 .inject(this);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        mTmdbViewModel = ViewModelProviders.of(this).get(TmdbViewModel.class);
+        mMainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         mLiveDataObserver = getLiveDataObserver();
 
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         if (savedInstanceState != null && savedInstanceState.containsKey
                 (EXTRA_DISPLAY_TYPE)) {
@@ -201,10 +199,10 @@ public class MainActivity extends AppCompatActivity
 
     private void loadData() {
 
-        if( mTmdbViewModel.getAllMovies().hasObservers() ) {
-            mTmdbViewModel.getAllMovies().removeObservers(this);
-            //mTmdbViewModel.getAllMovies().removeObserver(mLiveDataObserver);
-        }
+        //if( mMainViewModel.getAllMovies().hasObservers() ) {
+        //    mMainViewModel.getAllMovies().removeObservers(this);
+            //mMainViewModel.getAllMovies().removeObserver(mLiveDataObserver);
+        //}
 
         switch (mTmdbDisplayTypeSelected) {
             case SORT_RATING:
@@ -237,8 +235,8 @@ public class MainActivity extends AppCompatActivity
                 mDisposables.add(mPopularDisposable);
                 break;
 
-            case LOCAL_FAVORITES:
-                mTmdbViewModel.getAllMovies().observe(this, mLiveDataObserver);
+            //case LOCAL_FAVORITES:
+            //    mMainViewModel.getAllMovies().observe(this, mLiveDataObserver);
         }
     }
 

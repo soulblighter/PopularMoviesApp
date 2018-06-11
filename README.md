@@ -1,4 +1,10 @@
 # PopularMoviesApp
+
+[![Build Status](https://travis-ci.org/soulblighter/PopularMoviesApp.svg?branch=master)](https://travis-ci.org/soulblighter/PopularMoviesApp)
+[![Coverage Status](https://coveralls.io/repos/github/soulblighter/PopularMoviesApp/badge.svg?branch=master)](https://coveralls.io/github/soulblighter/PopularMoviesApp?branch=master)
+
+
+
 Popular Movies App
 
 This is an implementation of "Popular Movies, Stage 1" Udacity Android Nanodegree.

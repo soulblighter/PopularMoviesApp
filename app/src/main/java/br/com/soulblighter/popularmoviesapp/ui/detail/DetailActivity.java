@@ -1,4 +1,4 @@
-package br.com.soulblighter.popularmoviesapp.detail;
+package br.com.soulblighter.popularmoviesapp.ui.detail;
 
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
@@ -29,15 +29,15 @@ import javax.inject.Inject;
 import br.com.soulblighter.popularmoviesapp.BuildConfig;
 import br.com.soulblighter.popularmoviesapp.PopularMoviesApp;
 import br.com.soulblighter.popularmoviesapp.R;
-import br.com.soulblighter.popularmoviesapp.data.TmdbMovie;
-import br.com.soulblighter.popularmoviesapp.data.TmdbReview;
-import br.com.soulblighter.popularmoviesapp.data.TmdbReviewResp;
-import br.com.soulblighter.popularmoviesapp.data.TmdbTrailer;
-import br.com.soulblighter.popularmoviesapp.data.TmdbTrailerResp;
 import br.com.soulblighter.popularmoviesapp.databinding.ActivityDetailBinding;
 import br.com.soulblighter.popularmoviesapp.helper.NetworkUtils;
-import br.com.soulblighter.popularmoviesapp.main.TmdbViewModel;
+import br.com.soulblighter.popularmoviesapp.model.TmdbMovie;
+import br.com.soulblighter.popularmoviesapp.model.TmdbReview;
+import br.com.soulblighter.popularmoviesapp.model.TmdbTrailer;
 import br.com.soulblighter.popularmoviesapp.retrofit.TmdbService;
+import br.com.soulblighter.popularmoviesapp.retrofit.rest.TmdbReviewResp;
+import br.com.soulblighter.popularmoviesapp.retrofit.rest.TmdbTrailerResp;
+import br.com.soulblighter.popularmoviesapp.ui.main.MainViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableSingleObserver;
@@ -58,7 +58,7 @@ public class DetailActivity extends AppCompatActivity {
     @Inject
     public TmdbService mTmdbService;
 
-    private TmdbViewModel mTmdbViewModel;
+    private MainViewModel mMainViewModel;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
@@ -71,26 +71,25 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
 
         ((PopularMoviesApp) getApplication())
-                .getMyComponent()
+                .getDaggerRetrofitComponent()
                 .inject(this);
 
         Intent i = getIntent();
         final TmdbMovie movie = i.getParcelableExtra(EXTRA_MOVIE);
 
-
-        mTmdbViewModel = ViewModelProviders.of(this).get(TmdbViewModel.class);
+        mMainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
 
         mBinding = DataBindingUtil.setContentView(this, R.layout
                 .activity_detail);
 
         mBinding.scrollview.setOnTouchListener((view, motionEvent) -> {
-                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    mBinding.fab.show();
-                } else if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    mBinding.fab.hide();
+                    if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                        mBinding.fab.show();
+                    } else if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                        mBinding.fab.hide();
+                    }
+                    return false;
                 }
-                return false;
-            }
         );
 
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
@@ -98,7 +97,7 @@ public class DetailActivity extends AppCompatActivity {
             Date date = df.parse(movie.releaseDate);
             mBinding.tvDate.setText(this.getString(R.string.release_date,
                     String.valueOf(new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
-                    .format(date))));
+                            .format(date))));
         } catch (ParseException pe) {
             pe.printStackTrace();
             mBinding.tvDate.setText(this.getString(R.string.release_date,
@@ -111,40 +110,40 @@ public class DetailActivity extends AppCompatActivity {
         mBinding.tvName.setText(String.valueOf(movie.title));
 
         Picasso.with(this).load(NetworkUtils.buildImageUrl(movie.posterPath))
-            .placeholder(R.color.colorPrimary).into(mBinding.ivPoster);
+                .placeholder(R.color.colorPrimary).into(mBinding.ivPoster);
 
-        mDisposables.add(mTmdbViewModel.isFavorite(movie.id)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                isFavorite -> mBinding.fab.setImageResource(android.R.drawable.btn_star_big_on),
-                Throwable::printStackTrace,
-                () -> mBinding.fab.setImageResource(android.R.drawable.btn_star_big_off)));
+        mDisposables.add(mMainViewModel.isFavorite(movie.id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        isFavorite -> mBinding.fab.setImageResource(android.R.drawable.btn_star_big_on),
+                        Throwable::printStackTrace,
+                        () -> mBinding.fab.setImageResource(android.R.drawable.btn_star_big_off)));
 
         mBinding.fab.setOnClickListener(view -> {
 
-            mDisposables.add(mTmdbViewModel.isFavorite(movie.id)
+            mDisposables.add(mMainViewModel.isFavorite(movie.id)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(isFavorite -> {
-                        mTmdbViewModel.unmarkAsFavorite(movie);
-                        mBinding.fab.setImageResource(android.R.drawable
-                            .btn_star_big_off);
-                        Snackbar.make(mBinding.scrollview,
-                            String.format(getString(R.string.unmark_as_favorite), movie.title),
-                            Snackbar.LENGTH_SHORT).show();
-                    },
+                                mMainViewModel.unmarkAsFavorite(movie);
+                                mBinding.fab.setImageResource(android.R.drawable
+                                        .btn_star_big_off);
+                                Snackbar.make(mBinding.scrollview,
+                                        String.format(getString(R.string.unmark_as_favorite), movie.title),
+                                        Snackbar.LENGTH_SHORT).show();
+                            },
 
-                    Throwable::printStackTrace,
+                            Throwable::printStackTrace,
 
-                    () -> {
-                        mTmdbViewModel.markAsFavorite(movie);
-                        mBinding.fab.setImageResource(android.R.drawable.btn_star_big_on);
-                        Snackbar.make(mBinding.scrollview,
-                            String.format(getString(R.string.mark_as_favorite), movie.title),
-                            Snackbar.LENGTH_SHORT).show();
-                    }));
-            });
+                            () -> {
+                                mMainViewModel.markAsFavorite(movie);
+                                mBinding.fab.setImageResource(android.R.drawable.btn_star_big_on);
+                                Snackbar.make(mBinding.scrollview,
+                                        String.format(getString(R.string.mark_as_favorite), movie.title),
+                                        Snackbar.LENGTH_SHORT).show();
+                            }));
+        });
 
         vi = (LayoutInflater) getApplicationContext()
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -161,7 +160,7 @@ public class DetailActivity extends AppCompatActivity {
         mBinding.pbTrailers.setVisibility(View.VISIBLE);
 
         DisposableSingleObserver<TmdbTrailerResp>
-        trailersDisposable = getTrailersObserver();
+                trailersDisposable = getTrailersObserver();
         mTmdbService.getTrailers(String.valueOf(movie.id), BuildConfig.API_KEY)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -173,7 +172,7 @@ public class DetailActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(!mDisposables.isDisposed()) {
+        if (!mDisposables.isDisposed()) {
             mDisposables.dispose();
         }
     }
@@ -188,17 +187,13 @@ public class DetailActivity extends AppCompatActivity {
                 }
                 for (final TmdbTrailer trailer : trailers.results) {
                     if ("YouTube".equals(trailer.site)) {
-                        View v = vi.inflate(R.layout.trailer_item,
-                                null);
-                        TextView tv_trailer = v.findViewById(R.id
-                                .tv_trailer);
+                        View v = vi.inflate(R.layout.trailer_item, null);
+                        TextView tv_trailer = v.findViewById(R.id.tv_trailer);
                         tv_trailer.setText(trailer.name);
 
                         v.setOnClickListener(view -> {
-                            Intent intent = new Intent(Intent
-                                    .ACTION_VIEW, Uri.parse
-                                    (NetworkUtils.buildYoutubeUrl
-                                            (trailer.key)));
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse
+                                    (NetworkUtils.buildYoutubeUrl(trailer.key)));
                             startActivity(intent);
                         });
 
@@ -245,21 +240,22 @@ public class DetailActivity extends AppCompatActivity {
             }
         };
     }
-/*
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putIntArray(EXTRA_SCROLL_POS,
-                new int[]{mBinding.scrollview.getScrollX(), mBinding.scrollview
-                        .getScrollY()});
-    }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        mScrollPosition = savedInstanceState.getIntArray(EXTRA_SCROLL_POS);
-    }
-*/
+    /*
+        @Override
+        public void onSaveInstanceState(Bundle outState) {
+            super.onSaveInstanceState(outState);
+            outState.putIntArray(EXTRA_SCROLL_POS,
+                    new int[]{mBinding.scrollview.getScrollX(), mBinding.scrollview
+                            .getScrollY()});
+        }
+
+        @Override
+        protected void onRestoreInstanceState(Bundle savedInstanceState) {
+            super.onRestoreInstanceState(savedInstanceState);
+            mScrollPosition = savedInstanceState.getIntArray(EXTRA_SCROLL_POS);
+        }
+    */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {

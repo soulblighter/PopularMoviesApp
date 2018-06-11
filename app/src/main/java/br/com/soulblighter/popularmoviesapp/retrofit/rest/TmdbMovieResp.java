@@ -1,4 +1,4 @@
-package br.com.soulblighter.popularmoviesapp.data;
+package br.com.soulblighter.popularmoviesapp.retrofit.rest;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -10,20 +10,26 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.soulblighter.popularmoviesapp.model.TmdbMovie;
+
 public class TmdbMovieResp implements Serializable, Parcelable {
 
     @SerializedName("page")
     @Expose
     public int page;
+
     @SerializedName("total_results")
     @Expose
     public int totalResults;
+
     @SerializedName("total_pages")
     @Expose
     public int totalPages;
+
     @SerializedName("results")
     @Expose
     public List<TmdbMovie> results = new ArrayList<TmdbMovie>();
+
     public final static Parcelable.Creator<TmdbMovieResp> CREATOR = new Creator<TmdbMovieResp>() {
 
 

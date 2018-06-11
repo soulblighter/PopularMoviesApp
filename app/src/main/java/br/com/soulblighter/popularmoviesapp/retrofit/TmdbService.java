@@ -1,8 +1,8 @@
 package br.com.soulblighter.popularmoviesapp.retrofit;
 
-import br.com.soulblighter.popularmoviesapp.data.TmdbMovieResp;
-import br.com.soulblighter.popularmoviesapp.data.TmdbReviewResp;
-import br.com.soulblighter.popularmoviesapp.data.TmdbTrailerResp;
+import br.com.soulblighter.popularmoviesapp.retrofit.rest.TmdbMovieResp;
+import br.com.soulblighter.popularmoviesapp.retrofit.rest.TmdbReviewResp;
+import br.com.soulblighter.popularmoviesapp.retrofit.rest.TmdbTrailerResp;
 import io.reactivex.Single;
 import retrofit2.http.GET;
 import retrofit2.http.Path;

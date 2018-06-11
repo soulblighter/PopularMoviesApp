@@ -1,4 +1,4 @@
-package br.com.soulblighter.popularmoviesapp.data;
+package br.com.soulblighter.popularmoviesapp.retrofit.rest;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -9,6 +9,8 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import br.com.soulblighter.popularmoviesapp.model.TmdbReview;
 
 public class TmdbReviewResp implements Serializable, Parcelable {
 

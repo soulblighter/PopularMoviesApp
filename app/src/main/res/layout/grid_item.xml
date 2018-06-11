@@ -6,7 +6,7 @@
 
     <ImageView
         android:id="@+id/iv_image"
-        android:layout_width="200dp"
+        android:layout_width="@dimen/girde_item_width"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
         android:contentDescription="@string/poster_descritor"

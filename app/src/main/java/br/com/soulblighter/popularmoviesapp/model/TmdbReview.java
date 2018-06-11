@@ -1,4 +1,4 @@
-package br.com.soulblighter.popularmoviesapp.data;
+package br.com.soulblighter.popularmoviesapp.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -13,15 +13,19 @@ public class TmdbReview implements Serializable, Parcelable {
     @SerializedName("author")
     @Expose
     public String author;
+
     @SerializedName("content")
     @Expose
     public String content;
+
     @SerializedName("id")
     @Expose
     public String id;
+
     @SerializedName("url")
     @Expose
     public String url;
+
     public final static Parcelable.Creator<TmdbReview> CREATOR = new Creator<TmdbReview>() {
 
 

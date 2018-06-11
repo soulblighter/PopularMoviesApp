@@ -1,4 +1,4 @@
-package br.com.soulblighter.popularmoviesapp.data;
+package br.com.soulblighter.popularmoviesapp.room;
 
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
@@ -6,11 +6,13 @@ import android.os.AsyncTask;
 
 import java.util.List;
 
+import br.com.soulblighter.popularmoviesapp.model.TmdbMovie;
 import io.reactivex.Maybe;
+import io.reactivex.Single;
 
 public class TmdbRepository {
     private TmdbMovieDao mTmdbMovieDao;
-    private LiveData<List<TmdbMovie>> mAllMovies;
+    private Maybe<List<TmdbMovie>> mAllMovies;
 
     public TmdbRepository(Application application) {
         TmdbDatabase db = TmdbDatabase.getDatabase(application);
@@ -18,7 +20,7 @@ public class TmdbRepository {
         mAllMovies = mTmdbMovieDao.getAllMovies();
     }
 
-    public LiveData<List<TmdbMovie>> getAllMovies() {
+    public Maybe<List<TmdbMovie>> getAllMovies() {
         return mAllMovies;
     }
 
