@@ -2,16 +2,21 @@ package br.com.soulblighter.popularmoviesapp.ui.main;
 
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import androidx.databinding.DataBindingUtil;
+//import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Parcelable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import java.util.List;
 
@@ -22,10 +27,12 @@ import br.com.soulblighter.popularmoviesapp.PopularMoviesApp;
 import br.com.soulblighter.popularmoviesapp.R;
 import br.com.soulblighter.popularmoviesapp.model.TmdbMovie;
 import br.com.soulblighter.popularmoviesapp.retrofit.rest.TmdbMovieResp;
-import br.com.soulblighter.popularmoviesapp.databinding.ActivityMainBinding;
+//import br.com.soulblighter.popularmoviesapp.databinding.ActivityMainBinding;
 import br.com.soulblighter.popularmoviesapp.ui.detail.DetailActivity;
 import br.com.soulblighter.popularmoviesapp.helper.NetworkUtils;
 import br.com.soulblighter.popularmoviesapp.retrofit.TmdbService;
+//import butterknife.BindView;
+//import butterknife.ButterKnife;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableSingleObserver;
@@ -48,6 +55,20 @@ public class MainActivity extends AppCompatActivity
     private static final String EXTRA_DISPLAY_TYPE = "display_type";
     private static final String EXTRA_GRID_SATE = "gridstate";
 
+    // Workaround for swapping databinding to butterknife
+    static class ActivityMainBinding {
+        //@BindView(R.id.recyclerGridView)
+        RecyclerView recyclerGridView;
+
+        //@BindView(R.id.errorBox)
+        TextView errorBox;
+
+        public ActivityMainBinding(Activity activity) {
+            recyclerGridView = activity.findViewById(R.id.recyclerGridView);
+            errorBox = activity.findViewById(R.id.errorBox);
+        }
+    }
+
     private ActivityMainBinding mBinding;
     private PicassoGridViewAdapter mAdapter;
     private Parcelable mGridState;
@@ -66,7 +87,9 @@ public class MainActivity extends AppCompatActivity
         ((PopularMoviesApp) getApplication())
                 .getDaggerRetrofitComponent()
                 .inject(this);
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        //mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        mBinding = new ActivityMainBinding(this);
+        //ButterKnife.bind(mBinding, this);
 
         mMainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         mLiveDataObserver = getLiveDataObserver();

@@ -1,10 +1,14 @@
 package br.com.soulblighter.popularmoviesapp.ui.detail;
 
 import android.annotation.SuppressLint;
+
+import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.ViewModelProviders;
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import androidx.databinding.DataBindingUtil;
+//import androidx.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,9 +16,13 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 
@@ -29,7 +37,7 @@ import javax.inject.Inject;
 import br.com.soulblighter.popularmoviesapp.BuildConfig;
 import br.com.soulblighter.popularmoviesapp.PopularMoviesApp;
 import br.com.soulblighter.popularmoviesapp.R;
-import br.com.soulblighter.popularmoviesapp.databinding.ActivityDetailBinding;
+//import br.com.soulblighter.popularmoviesapp.databinding.ActivityDetailBinding;
 import br.com.soulblighter.popularmoviesapp.helper.NetworkUtils;
 import br.com.soulblighter.popularmoviesapp.model.TmdbMovie;
 import br.com.soulblighter.popularmoviesapp.model.TmdbReview;
@@ -37,7 +45,10 @@ import br.com.soulblighter.popularmoviesapp.model.TmdbTrailer;
 import br.com.soulblighter.popularmoviesapp.retrofit.TmdbService;
 import br.com.soulblighter.popularmoviesapp.retrofit.rest.TmdbReviewResp;
 import br.com.soulblighter.popularmoviesapp.retrofit.rest.TmdbTrailerResp;
+import br.com.soulblighter.popularmoviesapp.ui.main.MainActivity;
 import br.com.soulblighter.popularmoviesapp.ui.main.MainViewModel;
+//import butterknife.BindView;
+//import butterknife.ButterKnife;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableSingleObserver;
@@ -53,6 +64,55 @@ public class DetailActivity extends AppCompatActivity {
     //private static final String EXTRA_SCROLL_POS = "SCROLL_POSITION";
     //private int[] mScrollPosition;
 
+    // Workaround for swapping databinding to butterknife
+    static class ActivityDetailBinding {
+        //@BindView(R.id.scrollview)
+        NestedScrollView scrollview;
+
+        //@BindView(R.id.fab)
+        FloatingActionButton fab;
+
+        //@BindView(R.id.tv_date)
+        TextView tvDate;
+
+        //@BindView(R.id.tv_rating)
+        TextView tvRating;
+
+        //@BindView(R.id.tv_summary)
+        TextView tvSummary;
+
+        //@BindView(R.id.tv_name)
+        TextView tvName;
+
+        //@BindView(R.id.iv_poster)
+        ImageView ivPoster;
+
+        //@BindView(R.id.pb_trailers)
+        ProgressBar pbTrailers;
+
+        //@BindView(R.id.pb_review)
+        ProgressBar pbReview;
+
+        //@BindView(R.id.layout_trailer_list)
+        LinearLayout layoutTrailerList;
+
+        //@BindView(R.id.layout_review_list)
+        LinearLayout layoutReviewList;
+
+        public ActivityDetailBinding(Activity activity) {
+            scrollview = activity.findViewById(R.id.scrollview);
+            fab = activity.findViewById(R.id.fab);
+            tvDate = activity.findViewById(R.id.tv_date);
+            tvRating = activity.findViewById(R.id.tv_rating);
+            tvSummary = activity.findViewById(R.id.tv_summary);
+            tvName = activity.findViewById(R.id.tv_name);
+            ivPoster = activity.findViewById(R.id.iv_poster);
+            pbTrailers = activity.findViewById(R.id.pb_trailers);
+            pbReview = activity.findViewById(R.id.pb_review);
+            layoutTrailerList = activity.findViewById(R.id.layout_trailer_list);
+            layoutReviewList = activity.findViewById(R.id.layout_review_list);
+        }
+    }
     ActivityDetailBinding mBinding;
 
     @Inject
@@ -70,6 +130,10 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
+        //mBinding = DataBindingUtil.setContentView(this, R.layout.activity_detail);
+        mBinding = new ActivityDetailBinding(this);
+        //ButterKnife.bind(mBinding, this);
+
         ((PopularMoviesApp) getApplication())
                 .getDaggerRetrofitComponent()
                 .inject(this);
@@ -78,9 +142,6 @@ public class DetailActivity extends AppCompatActivity {
         final TmdbMovie movie = i.getParcelableExtra(EXTRA_MOVIE);
 
         mMainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-
-        mBinding = DataBindingUtil.setContentView(this, R.layout
-                .activity_detail);
 
         mBinding.scrollview.setOnTouchListener((view, motionEvent) -> {
                     if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
