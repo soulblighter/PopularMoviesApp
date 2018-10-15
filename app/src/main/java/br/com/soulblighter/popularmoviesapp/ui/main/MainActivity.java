@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
     private static final String EXTRA_DISPLAY_TYPE = "display_type";
     private static final String EXTRA_GRID_SATE = "gridstate";
 
-    // Workaround for swapping databinding to butterknife
+    // Workaround for removing databinding
     static class ActivityMainBinding {
         //@BindView(R.id.recyclerGridView)
         RecyclerView recyclerGridView;
@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity
                 .getDaggerRetrofitComponent()
                 .inject(this);
         //mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        setContentView(R.layout.activity_main);
         mBinding = new ActivityMainBinding(this);
         //ButterKnife.bind(mBinding, this);
 
