@@ -63,14 +63,14 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.1.0-beta01", {
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.1.0", {
         exclude group: "com.android.support", module: "support-annotations"
     })
 
     // Google support
     def support_version = "1.0.0"
     implementation "androidx.legacy:legacy-support-v4:$support_version"
-    implementation "androidx.appcompat:appcompat:$support_version"
+    implementation "androidx.appcompat:appcompat:1.0.2"
     implementation "androidx.recyclerview:recyclerview:$support_version"
     implementation "com.google.android.material:material:$support_version"
     implementation "androidx.constraintlayout:constraintlayout:1.1.3"
@@ -105,12 +105,12 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:2.1.12"
 
     // Dagger
-    def dagger_version = "2.16"
+    def dagger_version = "2.20"
     implementation "com.google.dagger:dagger:$dagger_version"
+    implementation "com.google.dagger:dagger-android:$dagger_version"
+    implementation "com.google.dagger:dagger-android-support:$dagger_version"
     annotationProcessor "com.google.dagger:dagger-compiler:$dagger_version"
-    //implementation "com.google.dagger:dagger-android:$dagger_version"
-    //implementation "com.google.dagger:dagger-android-support:$dagger_version" // if you use the support libraries
-    //annotationProcessor "com.google.dagger:dagger-android-processor:$dagger_version"
+    annotationProcessor "com.google.dagger:dagger-android-processor:$dagger_version"
 
     testImplementation "junit:junit:4.12"
 }
